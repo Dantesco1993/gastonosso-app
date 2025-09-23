@@ -1,0 +1,120 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ investimento.nome }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-3">{{ investimento.nome }}</h1>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <h5>Valor de Mercado Atual</h5>
+                        <p class="display-6 text-success fw-bold">R$ {{ investimento.valor_atual|floatformat:2 }}</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h5>Tipo</h5>
+                        <p class="lead">{{ investimento.get_tipo_display }}</p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <h5>Rendimento Anual (Estimado)</h5>
+                        <p class="lead">{{ investimento.taxa_rendimento_anual }}%</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-graph-up-arrow"></i> Projeção de Rendimentos (Juros Compostos)
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <label for="anosInput" class="form-label">Projetar por (anos):</label>
+                        <input type="number" class="form-control" id="anosInput" value="10" min="1">
+                    </div>
+                    <div class="col-md-8 text-center text-md-start mt-3 mt-md-0">
+                        <h5>Valor Projetado:</h5>
+                        <h2 class="display-5 fw-bold text-primary" id="resultadoProjecao">R$ 0,00</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <h2 class="h4">Fazer Novo Aporte</h2>
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST" action="{% url 'adicionar_aporte_investimento' investimento.id %}">
+                            {% csrf_token %}
+                            {{ form_aporte|crispy }}
+                            <button type="submit" class="btn btn-success w-100 mt-3">Aportar Valor</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <h2 class="h4">Histórico de Aportes</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr><th>Data</th><th>Valor</th><th>Conta de Origem</th><th>Autor</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for aporte in aportes %}
+                            <tr>
+                                <td>{{ aporte.data|date:"d/m/Y" }}</td>
+                                <td class="text-success">+ R$ {{ aporte.valor|floatformat:2 }}</td>
+                                <td>{{ aporte.conta_origem.nome }}</td>
+                                <td>{{ aporte.user.username }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center">Nenhum aporte registrado.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <a href="{% url 'lista_investimentos' %}" class="btn btn-secondary mt-3">Voltar para a lista de investimentos</a>
+    </div>
+</div>
+
+<script>
+    // Pegando os elementos da página
+    const anosInput = document.getElementById('anosInput');
+    const resultadoSpan = document.getElementById('resultadoProjecao');
+
+    // Pegando os dados do Django e convertendo para números JavaScript
+    const valorInicial = parseFloat("{{ investimento.valor_atual|stringformat:'f' }}".replace(',', '.'));
+    const taxaAnual = parseFloat("{{ investimento.taxa_rendimento_anual|stringformat:'f' }}".replace(',', '.')) / 100;
+
+    // Função que calcula os juros compostos
+    function calcularProjecao() {
+        const anos = parseInt(anosInput.value) || 0;
+
+        if (anos >= 1 && valorInicial > 0 && taxaAnual > 0) {
+            // Fórmula: M = P * (1 + r)^n
+            const valorFinal = valorInicial * Math.pow((1 + taxaAnual), anos);
+            
+            // Formata o resultado como moeda brasileira (BRL)
+            resultadoSpan.textContent = valorFinal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        } else {
+            // Se não houver anos, mostra o valor inicial
+            resultadoSpan.textContent = valorInicial.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+    }
+
+    // Adiciona um "ouvinte" que chama a função de cálculo toda vez que o valor do input muda
+    anosInput.addEventListener('input', calcularProjecao);
+
+    // Chama a função uma vez quando a página carrega para mostrar o valor inicial
+    calcularProjecao();
+</script>
+{% endblock %}

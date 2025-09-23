@@ -32,4 +32,8 @@ urlpatterns = [
     path('despesas/recorrente/adicionar/', views.adicionar_despesa_recorrente, name='adicionar_despesa_recorrente'),
     path('receitas/recorrente/adicionar/', views.adicionar_receita_recorrente, name='adicionar_receita_recorrente'),
     path('familia/', views.gerenciar_familia, name='gerenciar_familia'),
+    path('investimentos/', views.lista_investimentos, name='lista_investimentos'),
+    path('investimentos/<int:id>/', views.detalhe_investimento, name='detalhe_investimento'),
+    path('investimentos/aporte/<int:investimento_id>/', views.adicionar_aporte_investimento, name='adicionar_aporte_investimento'),
+    path('cartoes/<int:cartao_id>/pagar/', views.pagar_fatura, name='pagar_fatura'),
 ]

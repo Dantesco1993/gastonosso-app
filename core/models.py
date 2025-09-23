@@ -84,6 +84,7 @@ class Despesa(models.Model):
     parcela_atual = models.IntegerField(default=1)
     parcelas_totais = models.IntegerField(default=1)
     id_compra_parcelada = models.UUIDField(null=True, blank=True)
+    fatura_paga = models.BooleanField(default=False, help_text="Indica se a despesa de cartão já foi paga na fatura")
     
     # Campos para recorrência
     recorrente = models.BooleanField(default=False)
@@ -134,3 +135,29 @@ class MetaFinanceira(models.Model):
         
     def __str__(self):
         return self.nome
+    
+class Investimento(models.Model):
+    """Representa um ativo de investimento específico, compartilhado pela família."""
+    class TipoInvestimento(models.TextChoices):
+        RENDA_FIXA = 'RF', 'Renda Fixa'
+        RENDA_VARIAVEL = 'RV', 'Renda Variável'
+
+    familia = models.ForeignKey(Familia, on_delete=models.CASCADE)
+    nome = models.CharField(max_length=100, help_text="Ex: Tesouro Selic 2029, Ações WEG, FII MXRF11")
+    tipo = models.CharField(max_length=2, choices=TipoInvestimento.choices)
+    valor_atual = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Valor de mercado atual de todo o montante investido.")
+    taxa_rendimento_anual = models.DecimalField(max_digits=5, decimal_places=2, help_text="Para Renda Fixa, a taxa contratada. Para Renda Variável, uma estimativa.")
+
+    def __str__(self):
+        return f"{self.nome} ({self.get_tipo_display()})"
+
+class AporteInvestimento(models.Model):
+    """Representa uma transação de aporte (depósito) em um investimento."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    investimento = models.ForeignKey(Investimento, on_delete=models.CASCADE, related_name='aportes')
+    conta_origem = models.ForeignKey(Conta, on_delete=models.PROTECT, help_text="Conta da qual o dinheiro saiu para o aporte.")
+    data = models.DateField()
+    valor = models.DecimalField(max_digits=15, decimal_places=2)
+
+    def __str__(self):
+        return f"Aporte de R$ {self.valor} em {self.investimento.nome} por {self.user.username}"

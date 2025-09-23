@@ -25,11 +25,11 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'lista_cartoes' %}">Cartões</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'analise_gastos' %}">Análise</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'lista_metas' %}">Metas</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'lista_investimentos' %}">Investimentos</a></li>
         </ul>
         <div class="d-flex align-items-center">
             <span class="navbar-text me-3">Olá, {{ user.username }}</span>
             <a href="{% url 'configuracoes' %}" class="btn btn-outline-secondary me-2" title="Configurações"><i class="bi bi-gear-fill"></i></a>
-            
             <form class="d-flex" method="POST" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button class="btn btn-outline-light" type="submit">Sair</button>

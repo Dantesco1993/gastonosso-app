@@ -1,50 +1,55 @@
 {% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
 
 {% block title %}Fatura - {{ cartao.nome }}{% endblock %}
 
 {% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Fatura - {{ cartao.nome }}</h1>
+    <a href="{% url 'lista_cartoes' %}" class="btn btn-secondary">Voltar</a>
+</div>
+
 <div class="card mb-4">
-    <div class="card-header">
-        <h1>Fatura Atual - {{ cartao.nome }}</h1>
-    </div>
     <div class="card-body">
-        <p class="card-text">
-            <strong>Período da Fatura:</strong> de {{ data_inicio|date:"d/m/Y" }} até {{ data_fechamento|date:"d/m/Y" }} <br>
-            <strong>Vencimento:</strong> Dia {{ cartao.dia_vencimento }} do próximo mês
-        </p>
-        <h3 class="card-title text-danger">Valor Total: R$ {{ total_fatura|floatformat:2 }}</h3>
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <h5 class="card-title">Fatura em Aberto</h5>
+                <p class="card-text text-danger display-6 fw-bold">R$ {{ total_fatura|floatformat:2 }}</p>
+                <small class="text-muted">Período: {{ data_inicio|date:"d/m/Y" }} a {{ data_fechamento|date:"d/m/Y" }}</small>
+            </div>
+            <div class="col-md-8 border-start">
+                <h5 class="card-title">Pagar Fatura</h5>
+                {% if total_fatura > 0 %}
+                <form method="POST" action="{% url 'pagar_fatura' cartao.id %}">
+                    {% csrf_token %}
+                    {{ form_pagamento|crispy }}
+                    <button type="submit" class="btn btn-success mt-2">Confirmar Pagamento</button>
+                </form>
+                {% else %}
+                <p class="text-success">Não há valores em aberto para pagar nesta fatura.</p>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="card">
-    <div class="card-header">
-        <h2>Lançamentos</h2>
+    <div class="card-header">Lançamentos da Fatura Atual (Não Pagos)</div>
+    <div class="table-responsive">
+        <table class="table table-striped mb-0">
+            <thead><tr><th>Data</th><th>Descrição</th><th>Valor</th></tr></thead>
+            <tbody>
+                {% for despesa in despesas_abertas %}
+                <tr>
+                    <td>{{ despesa.data|date:"d/m/Y" }}</td>
+                    <td>{{ despesa }}</td>
+                    <td>R$ {{ despesa.valor|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="3" class="text-center">Nenhum lançamento em aberto.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    <table class="table table-striped mb-0">
-        <thead>
-            <tr>
-                <th>Data</th>
-                <th>Descrição</th>
-                <th>Categoria</th>
-                <th>Valor</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for despesa in despesas %}
-            <tr>
-                <td>{{ despesa.data|date:"d/m/Y" }}</td>
-                <td>{{ despesa }}</td>
-                <td>{{ despesa.categoria.nome }}</td>
-                <td>R$ {{ despesa.valor }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="4" class="text-center">Nenhum lançamento nesta fatura.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
-
-<a href="{% url 'lista_cartoes' %}" class="btn btn-secondary mt-4">Voltar para a lista de cartões</a>
 {% endblock %}
