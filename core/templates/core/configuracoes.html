@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Configurações{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Configurações</h1>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">Gerenciamento da Família</h5>
+        <p class="card-text">Crie ou gerencie os membros da sua família para compartilhar o orçamento.</p>
+        <a href="{% url 'gerenciar_familia' %}" class="btn btn-primary">Gerenciar Família</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" id="configTabs" role="tablist">
+            <li class="nav-item" role="presentation"><button class="nav-link {% if active_tab == 'cat-despesas' %}active{% endif %}" id="cat-despesas-tab" data-bs-toggle="tab" data-bs-target="#cat-despesas" type="button" role="tab">Categorias de Despesa</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link {% if active_tab == 'cat-receitas' %}active{% endif %}" id="cat-receitas-tab" data-bs-toggle="tab" data-bs-target="#cat-receitas" type="button" role="tab">Categorias de Receita</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link {% if active_tab == 'contas' %}active{% endif %}" id="contas-tab" data-bs-toggle="tab" data-bs-target="#contas" type="button" role="tab">Contas</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link {% if active_tab == 'cartoes' %}active{% endif %}" id="cartoes-tab" data-bs-toggle="tab" data-bs-target="#cartoes" type="button" role="tab">Cartões</button></li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="configTabsContent">
+            <div class="tab-pane fade {% if active_tab == 'cat-despesas' %}show active{% endif %}" id="cat-despesas" role="tabpanel">
+                {% include 'core/partials/config_panel.html' with title="Categorias de Despesa" items=categorias form=form_categoria form_name="form_categoria" delete_url_name="excluir_categoria" tab_id="cat-despesas" %}
+            </div>
+            <div class="tab-pane fade {% if active_tab == 'cat-receitas' %}show active{% endif %}" id="cat-receitas" role="tabpanel">
+                {% include 'core/partials/config_panel.html' with title="Categorias de Receita" items=categorias_receita form=form_categoria_receita form_name="form_categoria_receita" delete_url_name="excluir_categoria_receita" tab_id="cat-receitas" %}
+            </div>
+            <div class="tab-pane fade {% if active_tab == 'contas' %}show active{% endif %}" id="contas" role="tabpanel">
+                {% include 'core/partials/config_panel.html' with title="Contas" items=contas form=form_conta form_name="form_conta" delete_url_name="excluir_conta" tab_id="contas" %}
+            </div>
+            <div class="tab-pane fade {% if active_tab == 'cartoes' %}show active{% endif %}" id="cartoes" role="tabpanel">
+                {% include 'core/partials/config_panel.html' with title="Cartões de Crédito" items=cartoes form=form_cartao form_name="form_cartao" delete_url_name="excluir_cartao" tab_id="cartoes" %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

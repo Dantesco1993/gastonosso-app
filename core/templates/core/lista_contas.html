@@ -1,0 +1,41 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Minhas Contas{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Minhas Contas</h1>
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Nome da Conta</th>
+                    <th>Tipo</th>
+                    <th>Saldo Inicial</th>
+                    <th>Saldo Atual</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in contas_com_saldo %}
+                <tr>
+                    <td>{{ item.conta.nome }}</td>
+                    <td>{{ item.conta.get_tipo_display }}</td>
+                    <td>R$ {{ item.conta.saldo_inicial }}</td>
+                    <td class="fw-bold {% if item.saldo_atual < 0 %}text-danger{% else %}text-success{% endif %}">
+                        R$ {{ item.saldo_atual|floatformat:2 }}
+                    </td>
+                    <td>
+                        <a href="{% url 'detalhe_conta' item.conta.id %}" class="btn btn-sm btn-info">Ver Extrato</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">Nenhuma conta cadastrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

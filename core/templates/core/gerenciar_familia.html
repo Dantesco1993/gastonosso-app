@@ -1,0 +1,87 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Gerenciar Família{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Gerenciar Família</h1>
+
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<div class="row">
+    <div class="col-12">
+        {% if familia %}
+            <div class="card">
+                <div class="card-header">
+                    Sua Família
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Você pertence à Família: <strong>{{ familia.nome }}</strong></h5>
+                    <hr>
+                    <h6>Membros:</h6>
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for p in familia.perfil_set.all %}
+                        <li class="list-group-item">{{ p.user.username }}</li>
+                        {% endfor %}
+                    </ul>
+                    <h6><i class="bi bi-share"></i> Código de Convite:</h6>
+                    <p>Compartilhe este código para que outras pessoas possam entrar na sua família.</p>
+                    <div class="input-group">
+                        <input type="text" class="form-control" value="{{ familia.codigo_convite }}" id="codigoConvite" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="copiarCodigo()">Copiar</button>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Criar uma Nova Família</h5>
+                            <p>Comece um novo orçamento compartilhado.</p>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="nome_familia" class="form-label">Nome da Família:</label>
+                                    <input type="text" class="form-control" name="nome_familia" required>
+                                </div>
+                                <button type="submit" name="criar_familia" class="btn btn-primary">Criar Família</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Entrar em uma Família</h5>
+                            <p>Se você recebeu um código de convite, insira-o abaixo.</p>
+                            <form method="POST">
+                                {% csrf_token %}
+                                {{ form_entrar|crispy }}
+                                <button type="submit" name="entrar_familia" class="btn btn-secondary">Entrar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+function copiarCodigo() {
+    var codigoInput = document.getElementById("codigoConvite");
+    codigoInput.select();
+    codigoInput.setSelectionRange(0, 99999); /* Para mobile */
+    document.execCommand("copy");
+    alert("Código copiado: " + codigoInput.value);
+}
+</script>
+{% endblock %}

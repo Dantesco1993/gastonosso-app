@@ -1,0 +1,88 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard Financeiro</h1>
+
+<div class="row">
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card text-center border-primary shadow-sm">
+            <div class="card-header bg-primary text-white">Saldo Total em Contas</div>
+            <div class="card-body">
+                <h2 class="card-title display-5 fw-bold {% if saldo_total < 0 %}text-danger{% else %}text-success{% endif %}">
+                    R$ {{ saldo_total|floatformat:2 }}
+                </h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card text-center border-info shadow-sm">
+            <div class="card-header bg-info text-white">Balanço do Mês</div>
+            <div class="card-body">
+                <p class="card-text text-success mb-1"><i class="bi bi-arrow-up-circle"></i> Receitas: R$ {{ receitas_mes|floatformat:2 }}</p>
+                <p class="card-text text-danger"><i class="bi bi-arrow-down-circle"></i> Despesas: R$ {{ despesas_mes|floatformat:2 }}</p>
+                <h5 class="card-title mt-2 fw-bold {% if balanco_mensal < 0 %}text-danger{% else %}text-success{% endif %}">
+                    Balanço: R$ {{ balanco_mensal|floatformat:2 }}
+                </h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">Faturas de Cartão em Aberto</div>
+            {% if not faturas %}
+            <div class="card-body">
+                <p class="card-text">Nenhuma fatura em aberto.</p>
+            </div>
+            {% else %}
+            <ul class="list-group list-group-flush">
+                {% for fatura in faturas %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-credit-card"></i> {{ fatura.cartao.nome }}
+                    </div>
+                    <span class="badge bg-danger rounded-pill">R$ {{ fatura.total|floatformat:2 }}</span>
+                    <a href="{% url 'fatura_cartao' fatura.cartao.id %}" class="btn btn-sm btn-outline-secondary" title="Ver Fatura">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-header"><i class="bi bi-clock-history"></i> Atividade Recente</div>
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <tbody>
+                        {% for transacao in transacoes_recentes %}
+                        <tr>
+                            <td>{{ transacao.data|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if 'receita' in transacao|lower %}
+                                <i class="bi bi-plus-circle text-success"></i>
+                                {% else %}
+                                <i class="bi bi-dash-circle text-danger"></i>
+                                {% endif %}
+                                {{ transacao }}
+                            </td>
+                            <td class="{% if 'receita' in transacao|lower %}text-success{% else %}text-danger{% endif %} fw-bold">
+                                {% if 'receita' in transacao|lower %}+{% else %}-{% endif %} R$ {{ transacao.valor|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

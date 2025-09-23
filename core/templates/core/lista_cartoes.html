@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Meus Cartões{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Meus Cartões de Crédito</h1>
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Nome do Cartão</th>
+                    <th>Limite</th>
+                    <th>Dia de Fechamento</th>
+                    <th>Dia de Vencimento</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cartao in cartoes %}
+                <tr>
+                    <td>{{ cartao.nome }}</td>
+                    <td>R$ {{ cartao.limite }}</td>
+                    <td>{{ cartao.dia_fechamento }}</td>
+                    <td>{{ cartao.dia_vencimento }}</td>
+                    <td>
+                        <a href="{% url 'fatura_cartao' cartao.id %}" class="btn btn-sm btn-info">Ver Fatura Atual</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">Nenhum cartão cadastrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

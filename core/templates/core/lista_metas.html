@@ -1,0 +1,63 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Metas Financeiras{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <h2 class="mb-4">Adicionar Nova Meta</h2>
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" action="{% url 'lista_metas' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Nome</label>
+                        {{ form_meta.nome.errors }}
+                        <input type="text" name="{{ form_meta.nome.name }}" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Valor Objetivo</label>
+                        <input type="number" step="0.01" name="{{ form_meta.valor_objetivo.name }}" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Data Limite (Opcional)</label>
+                        <input type="date" name="{{ form_meta.data_limite.name }}" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Criar Meta</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <h2 class="mb-4">Minhas Metas</h2>
+        {% for meta in metas %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ meta.nome }}</h5>
+                <p class="card-text">
+                    <strong>Objetivo:</strong> R$ {{ meta.valor_objetivo|floatformat:2 }} <br>
+                    <strong>Alcançado:</strong> R$ {{ meta.valor_atual|floatformat:2 }}
+                </p>
+                <div class="progress" style="height: 25px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ meta.progresso_percentual }}%;" aria-valuenow="{{ meta.progresso_percentual }}" aria-valuemin="0" aria-valuemax="100">
+                        {{ meta.progresso_percentual|floatformat:0 }}%
+                    </div>
+                </div>
+                <form method="POST" action="{% url 'adicionar_aporte' meta.id %}" class="row g-2 mt-3 align-items-center">
+                    {% csrf_token %}
+                    <div class="col-auto">
+                        <input type="number" step="0.01" name="{{ form_aporte.valor.name }}" class="form-control form-control-sm" placeholder="Valor do Aporte">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-success btn-sm">Adicionar Aporte</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <p>Você ainda não tem nenhuma meta cadastrada.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

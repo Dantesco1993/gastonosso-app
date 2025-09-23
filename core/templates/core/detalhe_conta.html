@@ -1,0 +1,67 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Detalhes da Conta: {{ conta.nome }}{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h1>{{ conta.nome }}</h1>
+    </div>
+    <div class="card-body">
+        <h3 class="card-title {% if saldo_atual < 0 %}text-danger{% else %}text-success{% endif %}">
+            Saldo Atual: R$ {{ saldo_atual|floatformat:2 }}
+        </h3>
+        <p class="card-text">Tipo: {{ conta.get_tipo_display }} | Saldo Inicial: R$ {{ conta.saldo_inicial }}</p>
+    </div>
+</div>
+
+<h2 class="mb-3">Extrato de Transações</h2>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h3>Receitas</h3>
+    </div>
+    <table class="table table-striped mb-0">
+        <thead>
+            <tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Categoria</th></tr>
+        </thead>
+        <tbody>
+            {% for receita in receitas %}
+            <tr>
+                <td>{{ receita.descricao }}</td>
+                <td class="text-success">+ R$ {{ receita.valor }}</td>
+                <td>{{ receita.data|date:"d/m/Y" }}</td>
+                <td>{{ receita.categoria.nome }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">Nenhuma receita registrada para esta conta.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Despesas</h3>
+    </div>
+    <table class="table table-striped mb-0">
+        <thead>
+            <tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Categoria</th></tr>
+        </thead>
+        <tbody>
+            {% for despesa in despesas %}
+            <tr>
+                <td>{{ despesa }}</td>
+                <td class="text-danger">- R$ {{ despesa.valor }}</td>
+                <td>{{ despesa.data|date:"d/m/Y" }}</td>
+                <td>{{ despesa.categoria.nome }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center">Nenhuma despesa registrada para esta conta.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{% url 'lista_contas' %}" class="btn btn-secondary mt-4">Voltar para a lista de contas</a>
+{% endblock %}

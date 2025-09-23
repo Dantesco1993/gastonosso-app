@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Fatura - {{ cartao.nome }}{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h1>Fatura Atual - {{ cartao.nome }}</h1>
+    </div>
+    <div class="card-body">
+        <p class="card-text">
+            <strong>Período da Fatura:</strong> de {{ data_inicio|date:"d/m/Y" }} até {{ data_fechamento|date:"d/m/Y" }} <br>
+            <strong>Vencimento:</strong> Dia {{ cartao.dia_vencimento }} do próximo mês
+        </p>
+        <h3 class="card-title text-danger">Valor Total: R$ {{ total_fatura|floatformat:2 }}</h3>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h2>Lançamentos</h2>
+    </div>
+    <table class="table table-striped mb-0">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Categoria</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for despesa in despesas %}
+            <tr>
+                <td>{{ despesa.data|date:"d/m/Y" }}</td>
+                <td>{{ despesa }}</td>
+                <td>{{ despesa.categoria.nome }}</td>
+                <td>R$ {{ despesa.valor }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">Nenhum lançamento nesta fatura.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<a href="{% url 'lista_cartoes' %}" class="btn btn-secondary mt-4">Voltar para a lista de cartões</a>
+{% endblock %}

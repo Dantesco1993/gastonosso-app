@@ -1,0 +1,42 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Editar Despesa{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Editando: {{ despesa.descricao }}</h1>
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.descricao.id_for_label }}" class="form-label">Descrição</label>
+                    {{ form.descricao }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.valor.id_for_label }}" class="form-label">Valor</label>
+                    {{ form.valor }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.data.id_for_label }}" class="form-label">Data</label>
+                    {{ form.data }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.categoria.id_for_label }}" class="form-label">Categoria</label>
+                    {{ form.categoria }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.conta.id_for_label }}" class="form-label">Conta</label>
+                    {{ form.conta }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="{{ form.cartao.id_for_label }}" class="form-label">Cartão</label>
+                    {{ form.cartao }}
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            <a href="{% url 'lista_despesas' %}" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Adicionar {{ tipo|default:"Despesa" }} Recorrente{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Adicionar {{ tipo|default:"Despesa" }} Recorrente</h1>
+
+<div class="card">
+    <div class="card-body">
+        <p>Use este formulário para criar transações que se repetem. Escolha a frequência e o número de repetições, e todas as ocorrências serão criadas de uma só vez.</p>
+        <hr>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary mt-3">Criar Transações Recorrentes</button>
+            <a href="{% if tipo == 'Receita' %}{% url 'lista_receitas' %}{% else %}{% url 'lista_despesas' %}{% endif %}" class="btn btn-secondary mt-3">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
