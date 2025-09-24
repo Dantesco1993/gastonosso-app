@@ -56,15 +56,17 @@ class Conta(models.Model):
     def __str__(self):
         return self.nome
 
-    # --- NOVO MÉTODO ---
-    def get_saldo_atual(self, usuarios):
-        """Calcula o saldo realizado da conta com base em uma lista de usuários."""
-        hoje = date.today()
+    # --- MÉTODO ATUALIZADO ---
+    def get_saldo_atual(self, usuarios, data_base=None):
+        """Calcula o saldo realizado da conta com base em uma lista de usuários e uma data de referência."""
+        if data_base is None:
+            data_base = date.today()
+        
         # Garante que 'usuarios' seja uma lista de IDs para a consulta
         user_ids = [u.id for u in usuarios]
         
-        receitas = Receita.objects.filter(user_id__in=user_ids, conta=self, data__lte=hoje).aggregate(total=Sum('valor'))['total'] or 0
-        despesas = Despesa.objects.filter(user_id__in=user_ids, conta=self, data__lte=hoje).aggregate(total=Sum('valor'))['total'] or 0
+        receitas = Receita.objects.filter(user_id__in=user_ids, conta=self, data__lte=data_base).aggregate(total=Sum('valor'))['total'] or 0
+        despesas = Despesa.objects.filter(user_id__in=user_ids, conta=self, data__lte=data_base).aggregate(total=Sum('valor'))['total'] or 0
         
         return (self.saldo_inicial + receitas) - despesas
 
