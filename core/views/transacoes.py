@@ -14,32 +14,60 @@ def lista_despesas(request):
     user = request.user
     familia = user.perfil.familia
     
-    # A lógica de POST permanece a mesma
     if request.method == 'POST':
         form = DespesaForm(request.POST, user=user)
         if form.is_valid():
-            # ... (código de salvar despesa/parcela sem alteração)
+            dados_despesa = form.cleaned_data
+            num_parcelas = dados_despesa.get('numero_parcelas', 1)
+
+            # Lógica de parcelamento
+            if num_parcelas > 1:
+                valor_total = dados_despesa['valor']
+                data_inicial = dados_despesa['data']
+                descricao_base = dados_despesa['descricao']
+                valor_parcela = valor_total / num_parcelas
+                id_compra = uuid.uuid4()
+                for i in range(num_parcelas):
+                    data_parcela = data_inicial + relativedelta(months=i)
+                    Despesa.objects.create(
+                        user=user,
+                        descricao=f"{descricao_base} ({i+1}/{num_parcelas})",
+                        valor=valor_parcela,
+                        data=data_parcela,
+                        categoria=dados_despesa['categoria'],
+                        conta=dados_despesa.get('conta'),
+                        cartao=dados_despesa.get('cartao'),
+                        parcelada=True,
+                        parcela_atual=i + 1,
+                        parcelas_totais=num_parcelas,
+                        id_compra_parcelada=id_compra
+                    )
+                messages.success(request, f'{num_parcelas} parcelas foram criadas com sucesso!')
+            else:
+                # Lógica de despesa única
+                despesa = form.save(commit=False)
+                despesa.user = user
+                despesa.save()
+                messages.success(request, 'Despesa salva com sucesso!')
+            
             return redirect('lista_despesas')
+        # Se o formulário NÃO for válido, ele continua para renderizar a página com os erros
     else:
         form = DespesaForm(user=user)
 
-    # Lógica de Visão
+    # Lógica de Visão para exibir
     visao = request.GET.get('visao', 'conjunto')
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
     else:
         usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
 
-    # Busca a lista completa de despesas
     despesas_list = Despesa.objects.filter(user__in=usuarios_a_filtrar).order_by('-data', '-id')
     
-    # --- LÓGICA DE PAGINAÇÃO ---
-    paginator = Paginator(despesas_list, 20) # Mostra 20 despesas por página
+    paginator = Paginator(despesas_list, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    # ---------------------------
     
-    # ATUALIZAÇÃO: Passa o 'page_obj' para o template em vez de 'despesas'
     contexto = {'page_obj': page_obj, 'form': form, 'visao': visao, 'familia': familia}
     return render(request, 'core/lista_despesas.html', contexto)
 
