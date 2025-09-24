@@ -1,9 +1,9 @@
 <div id="lista-transacoes" class="col-lg-8" {% if hx_swap_oob %}hx-swap-oob="true"{% endif %}>
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h2>Lista de Despesas</h2>
+        <h2>Lista de Receitas</h2>
         <div class="d-flex gap-2">
             {% include 'core/partials/visao_seletor.html' %}
-            <a href="{% url 'adicionar_despesa_recorrente' %}" class="btn btn-info">
+            <a href="{% url 'adicionar_receita_recorrente' %}" class="btn btn-info">
                 <i class="bi bi-arrow-repeat"></i> Adicionar Recorrente
             </a>
         </div>
@@ -14,24 +14,26 @@
                 <thead>
                     <tr>
                         <th>Descrição</th><th>Valor</th><th>Data</th>
-                        <th>Categoria</th><th>Ações</th>
+                        <th>Categoria</th><th>Conta</th><th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for despesa in page_obj %}
+                    {% for receita in page_obj %}
                     <tr>
-                        <td>{{ despesa }}</td>
-                        <td class="text-danger fw-medium">- R$ {{ despesa.valor|floatformat:2 }}</td>
-                        <td>{{ despesa.data|date:"d/m/Y" }}</td>
-                        <td><span class="badge bg-secondary">{{ despesa.categoria }}</span></td>
+                        <td>{{ receita }}</td>
+                        <td class="text-success fw-medium">+ R$ {{ receita.valor|floatformat:2 }}</td>
+                        <td>{{ receita.data|date:"d/m/Y" }}</td>
+                        <td><span class="badge bg-secondary">{{ receita.categoria.nome }}</span></td>
+                        <td>{{ receita.conta.nome }}</td>
                         <td>
-                            <a href="{% url 'editar_despesa' despesa.id %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil-square"></i></a>
-                            <a href="{% url 'excluir_despesa' despesa.id %}" class="btn btn-sm btn-outline-danger" title="Excluir" onclick="return confirm('Tem certeza?');"><i class="bi bi-trash3"></i></a>
+                            <a href="{% url 'excluir_receita' receita.id %}" class="btn btn-sm btn-outline-danger" title="Excluir" onclick="return confirm('Tem certeza?');">
+                                <i class="bi bi-trash3"></i>
+                            </a>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5" class="text-center p-4">Nenhuma despesa cadastrada para a visão selecionada.</td>
+                        <td colspan="6" class="text-center p-4">Nenhuma receita cadastrada para a visão selecionada.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

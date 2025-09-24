@@ -1,0 +1,6 @@
+{# Este template é a resposta para um POST bem-sucedido. Ele não é exibido diretamente. #}
+{# Ele diz ao HTMX: "Encontre o elemento com id='lista-transacoes' na página e troque-o por este." #}
+{% include 'core/partials/lista_receitas_partial.html' with hx_swap_oob=True %}
+
+{# Ele também diz: "Encontre o elemento com id='form-receita-container' e troque-o por este." #}
+{% include 'core/partials/form_receita_partial.html' with hx_swap_oob=True %}

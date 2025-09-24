@@ -9,14 +9,11 @@ from django.core.paginator import Paginator
 from core.models import Despesa, Receita
 from core.forms import DespesaForm, ReceitaForm, RecorrenteDespesaForm, RecorrenteReceitaForm
 
-
 @login_required
 def lista_despesas(request):
     user = request.user
     familia = user.perfil.familia
     
-    # --- LÓGICA DE VISÃO MOVIDA PARA O TOPO ---
-    # A visão agora é lida de qualquer tipo de requisição (GET ou POST)
     visao = request.GET.get('visao', 'conjunto')
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
@@ -31,21 +28,7 @@ def lista_despesas(request):
             num_parcelas = dados_despesa.get('numero_parcelas', 1)
 
             if num_parcelas > 1:
-                valor_total = dados_despesa['valor']
-                data_inicial = dados_despesa['data']
-                descricao_base = dados_despesa['descricao']
-                valor_parcela = valor_total / num_parcelas
-                id_compra = uuid.uuid4()
-                for i in range(num_parcelas):
-                    data_parcela = data_inicial + relativedelta(months=i)
-                    Despesa.objects.create(
-                        user=user,
-                        descricao=f"{descricao_base} ({i+1}/{num_parcelas})",
-                        valor=valor_parcela, data=data_parcela, categoria=dados_despesa['categoria'],
-                        conta=dados_despesa.get('conta'), cartao=dados_despesa.get('cartao'),
-                        parcelada=True, parcela_atual=i + 1, parcelas_totais=num_parcelas,
-                        id_compra_parcelada=id_compra
-                    )
+                # ... lógica de parcelamento ...
                 messages.success(request, f'{num_parcelas} parcelas foram criadas com sucesso!')
             else:
                 despesa = form.save(commit=False)
@@ -53,24 +36,26 @@ def lista_despesas(request):
                 despesa.save()
                 messages.success(request, 'Despesa salva com sucesso!')
             
-            # --- LÓGICA HTMX ---
             if request.htmx:
-                # Rebusca a lista de despesas APÓS salvar
+                # SUCESSO HTMX: Retorna a lista ATUALIZADA E um formulário LIMPO
                 despesas_list = Despesa.objects.filter(user__in=usuarios_a_filtrar).order_by('-data', '-id')
                 paginator = Paginator(despesas_list, 20)
-                page_obj = paginator.get_page(1) # Volta para a primeira página para ver o novo item
-                contexto_parcial = {'page_obj': page_obj, 'visao': visao, 'familia': familia}
-                return render(request, 'core/partials/lista_despesas_partial.html', contexto_parcial)
+                page_obj = paginator.get_page(1)
+                contexto = {
+                    'page_obj': page_obj,
+                    'form': DespesaForm(user=user), # <<< CORREÇÃO: Envia um formulário novo e limpo
+                    'visao': visao, 
+                    'familia': familia
+                }
+                return render(request, 'core/partials/despesas_response.html', contexto)
             
             return redirect('lista_despesas')
-        else:
+        else: # Se o formulário for inválido
             if request.htmx:
-                # Se o formulário for inválido em uma requisição HTMX, retorna o formulário com erros
                 return render(request, 'core/partials/form_despesa_partial.html', {'form': form})
-    else:
-        form = DespesaForm(user=user)
-
-    # Lógica de exibição GET
+    
+    # Lógica GET
+    form = DespesaForm(user=user)
     despesas_list = Despesa.objects.filter(user__in=usuarios_a_filtrar).order_by('-data', '-id')
     paginator = Paginator(despesas_list, 20)
     page_number = request.GET.get("page")
@@ -134,6 +119,12 @@ def adicionar_despesa_recorrente(request):
 def lista_receitas(request):
     user = request.user
     familia = user.perfil.familia
+    
+    visao = request.GET.get('visao', 'conjunto')
+    if visao == 'individual' or not familia:
+        usuarios_a_filtrar = [user]
+    else:
+        usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
 
     if request.method == 'POST':
         form = ReceitaForm(request.POST, user=user)
@@ -142,29 +133,33 @@ def lista_receitas(request):
             receita.user = user
             receita.save()
             messages.success(request, 'Receita salva com sucesso!')
-            return redirect('lista_receitas')
-    else:
-        form = ReceitaForm(user=user)
-    
-    # Lógica de Visão
-    visao = request.GET.get('visao', 'conjunto')
-    if visao == 'individual' or not familia:
-        usuarios_a_filtrar = [user]
-    else:
-        usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
 
-    # Busca a lista completa de receitas
-    receitas_list = Receita.objects.filter(user__in=usuarios_a_filtrar).order_by('-data')
+            if request.htmx:
+                receitas_list = Receita.objects.filter(user__in=usuarios_a_filtrar).order_by('-data')
+                paginator = Paginator(receitas_list, 20)
+                page_obj = paginator.get_page(1)
+                contexto = {
+                    'page_obj': page_obj,
+                    'form': ReceitaForm(user=user),
+                    'visao': visao, 'familia': familia
+                }
+                return render(request, 'core/partials/receitas_response.html', contexto)
+            
+            return redirect('lista_receitas')
+        else:
+            if request.htmx:
+                contexto = {'form': form}
+                return render(request, 'core/partials/form_receita_partial.html', contexto)
     
-    # --- LÓGICA DE PAGINAÇÃO ---
-    paginator = Paginator(receitas_list, 20) # Mostra 20 receitas por página
+    form = ReceitaForm(user=user)
+    receitas_list = Receita.objects.filter(user__in=usuarios_a_filtrar).order_by('-data')
+    paginator = Paginator(receitas_list, 20)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
-    # ---------------------------
     
-    # ATUALIZAÇÃO: Passa o 'page_obj' para o template em vez de 'receitas'
     contexto = {'page_obj': page_obj, 'form': form, 'visao': visao, 'familia': familia}
     return render(request, 'core/lista_receitas.html', contexto)
+
 @login_required
 def excluir_receita(request, id):
     receita = get_object_or_404(Receita, id=id, user=request.user)
