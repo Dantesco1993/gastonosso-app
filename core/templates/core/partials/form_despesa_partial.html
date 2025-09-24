@@ -1,0 +1,10 @@
+<h2 class="mb-4">Adicionar Despesa</h2>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST" hx-post="{% url 'lista_despesas' %}" hx-target="#lista-transacoes" hx-swap="outerHTML">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-primary w-100 mt-3">Salvar Despesa</button>
+        </form>
+    </div>
+</div>

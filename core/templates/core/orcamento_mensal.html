@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Orçamento Mensal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h1>Orçamento Mensal</h1>
+    {% include 'core/partials/visao_seletor.html' %}
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-header">Total Orçado</div>
+            <div class="card-body"><h4 class="card-title">R$ {{ total_orcado|floatformat:2 }}</h4></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-header">Total Gasto</div>
+            <div class="card-body"><h4 class="card-title text-danger">R$ {{ total_gasto|floatformat:2 }}</h4></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-header">Total Restante</div>
+            <div class="card-body"><h4 class="card-title text-success">R$ {{ total_restante|floatformat:2 }}</h4></div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Acompanhamento por Categoria</h5>
+    </div>
+    <div class="card-body">
+        {% for item in dados_orcamento %}
+        <div class="mb-4">
+            <div class="d-flex justify-content-between">
+                <strong>{{ item.categoria.nome }}</strong>
+                <span>Gasto R$ {{ item.gasto|floatformat:2 }} de R$ {{ item.orcado|floatformat:2 }}</span>
+            </div>
+            <div class="progress" style="height: 20px;">
+                {% with progresso=item.progresso|floatformat:0 %}
+                <div class="progress-bar 
+                    {% if progresso >= 90 %}bg-danger{% elif progresso >= 75 %}bg-warning{% else %}bg-success{% endif %}" 
+                    role="progressbar" style="width: {{ progresso }}%;" 
+                    aria-valuenow="{{ progresso }}" aria-valuemin="0" aria-valuemax="100">
+                    {{ progresso }}%
+                </div>
+                {% endwith %}
+            </div>
+            <div class="text-end mt-1">
+                <small class="text-muted">Restante: R$ {{ item.restante|floatformat:2 }}</small>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">Nenhum orçamento definido. Vá para <a href="{% url 'configuracoes' %}">Configurações</a> para adicionar limites às suas categorias de despesa.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

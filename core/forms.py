@@ -92,7 +92,19 @@ class RecorrenteReceitaForm(forms.ModelForm):
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
-        fields = ['nome']
+        fields = ['nome', 'orcamento_mensal', 'categoria_mae']
+
+    def __init__(self, *args, **kwargs):
+        # Pega a família que a view vai passar
+        familia = kwargs.pop('familia', None)
+        super().__init__(*args, **kwargs)
+
+        if familia:
+            # Mostra apenas as categorias principais da família como opções para "categoria_mae"
+            self.fields['categoria_mae'].queryset = Categoria.objects.filter(
+                familia=familia, 
+                categoria_mae__isnull=True
+            )
 
 class CategoriaReceitaForm(forms.ModelForm):
     class Meta:

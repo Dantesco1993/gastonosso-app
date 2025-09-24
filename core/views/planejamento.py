@@ -122,6 +122,56 @@ def adicionar_aporte(request, id):
     return redirect('lista_metas')
 
 @login_required
+def orcamento_mensal(request):
+    user = request.user
+    familia = user.perfil.familia
+    hoje = date.today()
+    
+    visao = request.GET.get('visao', 'conjunto')
+    if visao == 'individual' or not familia:
+        usuarios_a_filtrar = [user]
+    else:
+        usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
+
+    # Pega todas as categorias da família que têm um orçamento definido (> 0)
+    categorias_orcadas = Categoria.objects.filter(familia=familia, orcamento_mensal__gt=0) if familia else []
+    
+    dados_orcamento = []
+    total_orcado = 0
+    total_gasto = 0
+
+    for categoria in categorias_orcadas:
+        gasto_mes = Despesa.objects.filter(
+            user__in=usuarios_a_filtrar,
+            categoria=categoria,
+            data__year=hoje.year,
+            data__month=hoje.month
+        ).aggregate(total=Sum('valor'))['total'] or 0
+        
+        restante = categoria.orcamento_mensal - gasto_mes
+        progresso = (gasto_mes / categoria.orcamento_mensal) * 100 if categoria.orcamento_mensal > 0 else 0
+        
+        dados_orcamento.append({
+            'categoria': categoria,
+            'orcado': categoria.orcamento_mensal,
+            'gasto': gasto_mes,
+            'restante': restante,
+            'progresso': min(progresso, 100) # Garante que não passe de 100%
+        })
+        total_orcado += categoria.orcamento_mensal
+        total_gasto += gasto_mes
+
+    contexto = {
+        'dados_orcamento': dados_orcamento,
+        'total_orcado': total_orcado,
+        'total_gasto': total_gasto,
+        'total_restante': total_orcado - total_gasto,
+        'visao': visao,
+        'familia': familia
+    }
+    return render(request, 'core/orcamento_mensal.html', contexto)
+
+@login_required
 def evolucao_patrimonio(request):
     user = request.user
     familia = user.perfil.familia

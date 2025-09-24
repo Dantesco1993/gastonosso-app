@@ -44,11 +44,13 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_htmx', # Adicione esta linha
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', # Adicionado para servir estáticos em produção
+    'django_htmx.middleware.HtmxMiddleware', # Adicione esta linha
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

@@ -12,29 +12,33 @@ from core.forms import (
 @login_required
 def configuracoes(request):
     user = request.user
-    try:
-        familia = user.perfil.familia
-    except (Perfil.DoesNotExist, AttributeError):
-        familia = None
+    familia = user.perfil.familia
+
     if request.method == 'POST':
         if not familia:
             messages.error(request, "Você precisa criar ou pertencer a uma família para adicionar itens.")
             return redirect('gerenciar_familia')
+        
         active_tab = request.POST.get('active_tab', 'cat-despesas')
+        
         if 'form_categoria' in request.POST:
-            form = CategoriaForm(request.POST)
+            # CORREÇÃO: Passa a família também no POST para a validação funcionar
+            form = CategoriaForm(request.POST, familia=familia)
             if form.is_valid():
                 categoria = form.save(commit=False)
                 categoria.familia = familia
                 categoria.save()
-                messages.success(request, 'Categoria de despesa adicionada!')
+                messages.success(request, 'Categoria de despesa salva com sucesso!')
+        
         elif 'form_categoria_receita' in request.POST:
             form = CategoriaReceitaForm(request.POST)
             if form.is_valid():
+                # CORREÇÃO: Adiciona a lógica de salvar com 'commit=False'
                 cat = form.save(commit=False)
                 cat.familia = familia
                 cat.save()
                 messages.success(request, 'Categoria de receita adicionada!')
+        
         elif 'form_conta' in request.POST:
             form = ContaForm(request.POST)
             if form.is_valid():
@@ -42,6 +46,7 @@ def configuracoes(request):
                 conta.familia = familia
                 conta.save()
                 messages.success(request, 'Conta adicionada com sucesso!')
+
         elif 'form_cartao' in request.POST:
             form = CartaoDeCreditoForm(request.POST)
             if form.is_valid():
@@ -49,15 +54,23 @@ def configuracoes(request):
                 cartao.familia = familia
                 cartao.save()
                 messages.success(request, 'Cartão de crédito adicionado!')
-        return redirect(f"{reverse('configuracoes')}?active_tab={active_tab}")
+
+        # Se o formulário for inválido, o redirect não acontece e a página é re-renderizada
+        # com os erros graças ao crispy-forms.
+        # Se for válido, redireciona.
+        if form.is_valid():
+            return redirect(f"{reverse('configuracoes')}?active_tab={active_tab}")
+    
+    # Lógica para GET
+    categorias_principais = Categoria.objects.filter(familia=familia, categoria_mae__isnull=True).prefetch_related('subcategorias') if familia else []
     
     active_tab_get = request.GET.get('active_tab', 'cat-despesas')
     contexto = {
-        'categorias': Categoria.objects.filter(familia=familia) if familia else [],
+        'categorias_principais': categorias_principais,
         'categorias_receita': CategoriaReceita.objects.filter(familia=familia) if familia else [],
         'contas': Conta.objects.filter(familia=familia) if familia else [],
         'cartoes': CartaoDeCredito.objects.filter(familia=familia) if familia else [],
-        'form_categoria': CategoriaForm(),
+        'form_categoria': CategoriaForm(familia=familia),
         'form_categoria_receita': CategoriaReceitaForm(),
         'form_conta': ContaForm(),
         'form_cartao': CartaoDeCreditoForm(),

@@ -13,7 +13,6 @@ class Familia(models.Model):
     nome = models.CharField(max_length=100)
     codigo_convite = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
-
     def __str__(self):
         return self.nome
 
@@ -28,11 +27,27 @@ class Perfil(models.Model):
 # --- Modelos de Configuração (Compartilhados pela Família) ---
 
 class Categoria(models.Model):
-    """Categorias de despesa, compartilhadas pela família."""
-    familia = models.ForeignKey(Familia, on_delete=models.CASCADE)
+    """Categorias de despesa, compartilhadas pela família, com suporte a hierarquia."""
+    familia = models.ForeignKey('Familia', on_delete=models.CASCADE)
     nome = models.CharField(max_length=100)
+    orcamento_mensal = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0.00, 
+        help_text="Defina um limite de gastos mensal para esta categoria."
+    )
+    categoria_mae = models.ForeignKey(
+        'self', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='subcategorias',
+        verbose_name="Categoria Principal"
+    )
     
     def __str__(self):
+        if self.categoria_mae:
+            return f"{self.categoria_mae.nome} -> {self.nome}"
         return self.nome
 
 class CategoriaReceita(models.Model):
@@ -44,11 +59,14 @@ class CategoriaReceita(models.Model):
         return self.nome
 
 class Conta(models.Model):
+    """Contas bancárias ou carteiras, compartilhadas pela família."""
     familia = models.ForeignKey('Familia', on_delete=models.CASCADE)
+    
     class TipoConta(models.TextChoices):
         CARTEIRA = 'CA', 'Carteira'
         CONTA_CORRENTE = 'CC', 'Conta Corrente'
         POUPANCA = 'PO', 'Poupança'
+        
     nome = models.CharField(max_length=100)
     tipo = models.CharField(max_length=2, choices=TipoConta.choices, default=TipoConta.CONTA_CORRENTE)
     saldo_inicial = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
@@ -56,13 +74,11 @@ class Conta(models.Model):
     def __str__(self):
         return self.nome
 
-    # --- MÉTODO ATUALIZADO ---
     def get_saldo_atual(self, usuarios, data_base=None):
         """Calcula o saldo realizado da conta com base em uma lista de usuários e uma data de referência."""
         if data_base is None:
             data_base = date.today()
         
-        # Garante que 'usuarios' seja uma lista de IDs para a consulta
         user_ids = [u.id for u in usuarios]
         
         receitas = Receita.objects.filter(user_id__in=user_ids, conta=self, data__lte=data_base).aggregate(total=Sum('valor'))['total'] or 0
@@ -71,6 +87,7 @@ class Conta(models.Model):
         return (self.saldo_inicial + receitas) - despesas
 
 class CartaoDeCredito(models.Model):
+    """Cartões de crédito, compartilhados pela família."""
     familia = models.ForeignKey('Familia', on_delete=models.CASCADE)
     nome = models.CharField(max_length=100)
     limite = models.DecimalField(max_digits=10, decimal_places=2)
@@ -80,18 +97,14 @@ class CartaoDeCredito(models.Model):
     def __str__(self):
         return self.nome
 
-    # --- MÉTODO CORRIGIDO ---
     def get_fatura_aberta(self, usuarios, data_base=None):
         """Calcula o período, as despesas e o total da fatura em aberto com base em uma data."""
         if data_base is None:
             data_base = date.today()
         
-        # Lógica robusta para calcular a data de fechamento
         try:
-            # Tenta criar a data de fechamento no mês da data_base
             data_fechamento_base = data_base.replace(day=self.dia_fechamento)
         except ValueError:
-            # Se der erro (ex: dia 31 em Fevereiro), pega o último dia do mês
             proximo_mes = data_base.replace(day=1) + relativedelta(months=1)
             data_fechamento_base = proximo_mes - relativedelta(days=1)
         
@@ -126,6 +139,8 @@ class CartaoDeCredito(models.Model):
             'data_fechamento': data_fechamento,
         }
 
+# --- Modelos de Transação (Pertencem a um Usuário Individual) ---
+
 class Despesa(models.Model):
     """Representa uma despesa individual, feita por um usuário específico."""
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -135,15 +150,11 @@ class Despesa(models.Model):
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
     conta = models.ForeignKey(Conta, on_delete=models.PROTECT, null=True, blank=True)
     cartao = models.ForeignKey(CartaoDeCredito, on_delete=models.PROTECT, null=True, blank=True)
-    
-    # Campos para parcelamento
+    fatura_paga = models.BooleanField(default=False, help_text="Indica se a despesa de cartão já foi paga na fatura")
     parcelada = models.BooleanField(default=False)
     parcela_atual = models.IntegerField(default=1)
     parcelas_totais = models.IntegerField(default=1)
     id_compra_parcelada = models.UUIDField(null=True, blank=True)
-    fatura_paga = models.BooleanField(default=False, help_text="Indica se a despesa de cartão já foi paga na fatura")
-    
-    # Campos para recorrência
     recorrente = models.BooleanField(default=False)
     id_recorrencia = models.UUIDField(null=True, blank=True)
     
@@ -162,8 +173,6 @@ class Receita(models.Model):
     data = models.DateField()
     categoria = models.ForeignKey(CategoriaReceita, on_delete=models.PROTECT)
     conta = models.ForeignKey(Conta, on_delete=models.PROTECT)
-
-    # Campos para recorrência
     recorrente = models.BooleanField(default=False)
     id_recorrencia = models.UUIDField(null=True, blank=True)
     
@@ -172,7 +181,7 @@ class Receita(models.Model):
             return f"{self.descricao} 🔁"
         return self.descricao
 
-# --- Modelo de Planejamento (Compartilhado pela Família) ---
+# --- Modelos de Planejamento e Ativos (Compartilhados pela Família) ---
 
 class MetaFinanceira(models.Model):
     """Metas financeiras, compartilhadas pela família."""
@@ -192,19 +201,18 @@ class MetaFinanceira(models.Model):
         
     def __str__(self):
         return self.nome
-    
+
 class Investimento(models.Model):
     """Representa um ativo de investimento específico, compartilhado pela família."""
     class TipoInvestimento(models.TextChoices):
         RENDA_FIXA = 'RF', 'Renda Fixa'
         RENDA_VARIAVEL = 'RV', 'Renda Variável'
 
-    familia = models.ForeignKey('Familia', on_delete=models.CASCADE)
+    familia = models.ForeignKey(Familia, on_delete=models.CASCADE)
     nome = models.CharField(max_length=100, help_text="Ex: Tesouro Selic 2029, Ações WEG, FII MXRF11")
     tipo = models.CharField(max_length=2, choices=TipoInvestimento.choices)
     valor_atual = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Valor de mercado atual de todo o montante investido.")
     taxa_rendimento_anual = models.DecimalField(max_digits=5, decimal_places=2, help_text="Para Renda Fixa, a taxa contratada. Para Renda Variável, uma estimativa.")
-    # --- CAMPO ADICIONADO ---
     data_criacao = models.DateField(auto_now_add=True)
 
     def __str__(self):
