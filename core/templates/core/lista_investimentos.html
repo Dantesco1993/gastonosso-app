@@ -7,9 +7,13 @@
 <div class="row mb-4">
     <div class="col-12">
         <div class="card text-center">
-            <div class="card-header">Patrimônio Total Investido</div>
+            <div class="card-header">
+                Patrimônio Total Investido
+            </div>
             <div class="card-body">
-                <h2 class="card-title display-5 fw-bold text-success">R$ {{ total_investido|floatformat:2 }}</h2>
+                <h2 class="card-title display-5 fw-bold text-success">
+                    R$ {{ total_investido|floatformat:2 }}
+                </h2>
             </div>
         </div>
     </div>
@@ -39,7 +43,8 @@
                         <th>Tipo</th>
                         <th>Valor Atual</th>
                         <th>Taxa Anual (%)</th>
-                        <th>Ações</th> </tr>
+                        <th>Ações</th>
+                    </tr>
                 </thead>
                 <tbody>
                     {% for investimento in investimentos %}
@@ -48,7 +53,11 @@
                         <td>{{ investimento.get_tipo_display }}</td>
                         <td class="text-success">R$ {{ investimento.valor_atual|floatformat:2 }}</td>
                         <td>{{ investimento.taxa_rendimento_anual }}%</td>
-                        <td> <a href="{% url 'detalhe_investimento' investimento.id %}" class="btn btn-sm btn-outline-info">Ver Detalhes</a>
+                        <td>
+                            <a href="{% url 'detalhe_investimento' investimento.id %}" class="btn btn-sm btn-outline-info" title="Ver Detalhes"><i class="bi bi-eye"></i></a>
+                            <a href="{% url 'excluir_investimento' investimento.id %}" class="btn btn-sm btn-outline-danger" title="Excluir" onclick="return confirm('Tem certeza que deseja excluir este investimento? Todo o histórico de aportes será perdido.');">
+                                <i class="bi bi-trash3"></i>
+                            </a>
                         </td>
                     </tr>
                     {% empty %}

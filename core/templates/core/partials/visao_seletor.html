@@ -1,0 +1,10 @@
+{% if familia %}
+<div class="btn-group" role="group">
+    <a href="?visao=individual" class="btn {% if visao == 'individual' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
+        <i class="bi bi-person"></i> Minha Visão
+    </a>
+    <a href="?visao=conjunto" class="btn {% if visao == 'conjunto' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
+        <i class="bi bi-people"></i> Visão da Família
+    </a>
+</div>
+{% endif %}

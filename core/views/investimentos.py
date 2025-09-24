@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Sum
+from django.contrib.auth.models import User
 
-from core.models import Investimento, AporteInvestimento, Categoria, Despesa
+from core.models import Investimento, AporteInvestimento, Categoria, Despesa, Conta
 from core.forms import InvestimentoForm, AporteInvestimentoForm
 
 @login_required
@@ -25,7 +26,13 @@ def lista_investimentos(request):
     else:
         form = InvestimentoForm()
 
-    investimentos = Investimento.objects.filter(familia=familia) if familia else []
+    # CORREÇÃO: Usamos .none() para retornar um QuerySet vazio se não houver família
+    if familia:
+        investimentos = Investimento.objects.filter(familia=familia)
+    else:
+        investimentos = Investimento.objects.none()
+    
+    # Esta linha agora funciona com segurança em ambos os casos
     total_investido = investimentos.aggregate(total=Sum('valor_atual'))['total'] or 0
 
     contexto = {
@@ -38,9 +45,22 @@ def lista_investimentos(request):
 
 @login_required
 def detalhe_investimento(request, id):
-    familia = request.user.perfil.familia
+    user = request.user
+    familia = user.perfil.familia
     investimento = get_object_or_404(Investimento, id=id, familia=familia)
-    aportes = AporteInvestimento.objects.filter(investimento=investimento).order_by('-data')
+    
+    # --- LÓGICA DE VISÃO ADICIONADA ---
+    visao = request.GET.get('visao', 'conjunto')
+    if visao == 'individual' or not familia:
+        usuarios_a_filtrar = [user]
+    else:
+        usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
+
+    # Filtra os aportes com base na visão selecionada
+    aportes = AporteInvestimento.objects.filter(
+        investimento=investimento,
+        user__in=usuarios_a_filtrar
+    ).order_by('-data')
     
     form_aporte = AporteInvestimentoForm(user=request.user)
 
@@ -48,9 +68,10 @@ def detalhe_investimento(request, id):
         'investimento': investimento,
         'aportes': aportes,
         'form_aporte': form_aporte,
+        'visao': visao,
+        'familia': familia
     }
     return render(request, 'core/detalhe_investimento.html', contexto)
-
 
 @login_required
 def adicionar_aporte_investimento(request, investimento_id):
@@ -88,3 +109,20 @@ def adicionar_aporte_investimento(request, investimento_id):
     
     messages.error(request, 'Houve um erro ao processar o aporte. Verifique os dados.')
     return redirect('detalhe_investimento', id=investimento.id)
+
+@login_required
+def excluir_investimento(request, id):
+    familia = request.user.perfil.familia
+    # Garante que o usuário só pode excluir investimentos da sua própria família
+    investimento = get_object_or_404(Investimento, id=id, familia=familia)
+    
+    # Antes de excluir o investimento, subtrai seu valor do saldo das contas
+    # para manter a consistência do patrimônio total.
+    # Esta lógica pode ser ajustada conforme a necessidade de relatórios futuros.
+    
+    # Exclui o investimento. O Django automaticamente excluirá todos os
+    # AporteInvestimento associados a ele (efeito cascata).
+    investimento.delete()
+    
+    messages.success(request, f'O investimento "{investimento.nome}" e seu histórico de aportes foram excluídos com sucesso.')
+    return redirect('lista_investimentos')

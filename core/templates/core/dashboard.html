@@ -3,7 +3,10 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1 class="mb-4">Dashboard Financeiro</h1>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h1>Dashboard Financeiro</h1>
+    {% include 'core/partials/visao_seletor.html' %}
+</div>
 
 <div class="row">
     <div class="col-md-6 col-lg-4 mb-4">

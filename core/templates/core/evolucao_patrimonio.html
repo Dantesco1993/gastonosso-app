@@ -1,0 +1,61 @@
+{% extends 'core/base.html' %}
+{% load humanize %} {% block title %}Evolução do Patrimônio{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h1>Evolução do Patrimônio Líquido</h1>
+    {% include 'core/partials/visao_seletor.html' %}
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card text-center">
+            <div class="card-header">Patrimônio Líquido Atual</div>
+            <div class="card-body">
+                <h2 class="card-title display-5 fw-bold {% if patrimonio_atual < 0 %}text-danger{% else %}text-primary{% endif %}">
+                    R$ {{ patrimonio_atual|floatformat:2|intcomma }}
+                </h2>
+                <small class="text-muted">Ativos (Contas + Investimentos) - Dívidas (Faturas)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Gráfico de Evolução (Últimos 12 Meses)</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="patrimonioChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ labels|safe }};
+    const data = {{ data|safe }};
+    const ctx = document.getElementById('patrimonioChart');
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Patrimônio Líquido (R$)',
+                data: data,
+                fill: true,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: false } }
+        }
+    });
+</script>
+{% endblock %}

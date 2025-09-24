@@ -36,4 +36,6 @@ urlpatterns = [
     path('investimentos/<int:id>/', views.detalhe_investimento, name='detalhe_investimento'),
     path('investimentos/aporte/<int:investimento_id>/', views.adicionar_aporte_investimento, name='adicionar_aporte_investimento'),
     path('cartoes/<int:cartao_id>/pagar/', views.pagar_fatura, name='pagar_fatura'),
+    path('investimentos/excluir/<int:id>/', views.excluir_investimento, name='excluir_investimento'),
+    path('patrimonio/', views.evolucao_patrimonio, name='evolucao_patrimonio'),
 ]

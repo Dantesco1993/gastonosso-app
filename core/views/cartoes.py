@@ -21,37 +21,24 @@ def fatura_cartao(request, id):
     user = request.user
     familia = user.perfil.familia
     cartao = get_object_or_404(CartaoDeCredito, id=id, familia=familia)
-    hoje = date.today()
     
     visao = request.GET.get('visao', 'conjunto')
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
     else:
         usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
+    
+    # --- LÓGICA SIMPLIFICADA ---
+    fatura = cartao.get_fatura_aberta(usuarios=usuarios_a_filtrar)
 
-    if hoje.day <= cartao.dia_fechamento:
-        data_fechamento_fatura = hoje.replace(day=cartao.dia_fechamento)
-    else:
-        data_fechamento_fatura = (hoje + relativedelta(months=1)).replace(day=cartao.dia_fechamento)
-    data_inicio_fatura = (data_fechamento_fatura - relativedelta(months=1)) + relativedelta(days=1)
-    
-    despesas_abertas = Despesa.objects.filter(
-        user__in=usuarios_a_filtrar,
-        cartao=cartao,
-        data__gte=data_inicio_fatura,
-        data__lte=data_fechamento_fatura,
-        fatura_paga=False
-    ).order_by('data')
-    
-    total_fatura = despesas_abertas.aggregate(Sum('valor'))['valor__sum'] or 0
     form_pagamento = PagamentoFaturaForm(familia=familia)
 
     contexto = {
         'cartao': cartao,
-        'despesas_abertas': despesas_abertas,
-        'total_fatura': total_fatura,
-        'data_inicio': data_inicio_fatura,
-        'data_fechamento': data_fechamento_fatura,
+        'despesas_abertas': fatura['despesas'],
+        'total_fatura': fatura['total'],
+        'data_inicio': fatura['data_inicio'],
+        'data_fechamento': fatura['data_fechamento'],
         'form_pagamento': form_pagamento,
     }
     return render(request, 'core/fatura_cartao.html', contexto)

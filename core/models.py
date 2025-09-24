@@ -2,6 +2,9 @@ import uuid
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import User
+from django.db.models import Sum
+from datetime import date
+from dateutil.relativedelta import relativedelta
 
 # --- Modelos Estruturais para Compartilhamento ---
 
@@ -41,14 +44,11 @@ class CategoriaReceita(models.Model):
         return self.nome
 
 class Conta(models.Model):
-    """Contas bancárias ou carteiras, compartilhadas pela família."""
-    familia = models.ForeignKey(Familia, on_delete=models.CASCADE)
-    
+    familia = models.ForeignKey('Familia', on_delete=models.CASCADE)
     class TipoConta(models.TextChoices):
         CARTEIRA = 'CA', 'Carteira'
         CONTA_CORRENTE = 'CC', 'Conta Corrente'
         POUPANCA = 'PO', 'Poupança'
-        
     nome = models.CharField(max_length=100)
     tipo = models.CharField(max_length=2, choices=TipoConta.choices, default=TipoConta.CONTA_CORRENTE)
     saldo_inicial = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
@@ -56,9 +56,20 @@ class Conta(models.Model):
     def __str__(self):
         return self.nome
 
+    # --- NOVO MÉTODO ---
+    def get_saldo_atual(self, usuarios):
+        """Calcula o saldo realizado da conta com base em uma lista de usuários."""
+        hoje = date.today()
+        # Garante que 'usuarios' seja uma lista de IDs para a consulta
+        user_ids = [u.id for u in usuarios]
+        
+        receitas = Receita.objects.filter(user_id__in=user_ids, conta=self, data__lte=hoje).aggregate(total=Sum('valor'))['total'] or 0
+        despesas = Despesa.objects.filter(user_id__in=user_ids, conta=self, data__lte=hoje).aggregate(total=Sum('valor'))['total'] or 0
+        
+        return (self.saldo_inicial + receitas) - despesas
+
 class CartaoDeCredito(models.Model):
-    """Cartões de crédito, compartilhados pela família."""
-    familia = models.ForeignKey(Familia, on_delete=models.CASCADE)
+    familia = models.ForeignKey('Familia', on_delete=models.CASCADE)
     nome = models.CharField(max_length=100)
     limite = models.DecimalField(max_digits=10, decimal_places=2)
     dia_fechamento = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(31)])
@@ -67,7 +78,36 @@ class CartaoDeCredito(models.Model):
     def __str__(self):
         return self.nome
 
-# --- Modelos de Transação (Pertencem a um Usuário Individual) ---
+    # --- MÉTODO ATUALIZADO ---
+    def get_fatura_aberta(self, usuarios, data_base=None):
+        """Calcula o período, as despesas e o total da fatura em aberto com base em uma data."""
+        if data_base is None:
+            data_base = date.today()
+        
+        if data_base.day <= self.dia_fechamento:
+            data_fechamento = data_base.replace(day=self.dia_fechamento)
+        else:
+            data_fechamento = (data_base + relativedelta(months=1)).replace(day=self.dia_fechamento)
+        data_inicio = (data_fechamento - relativedelta(months=1)) + relativedelta(days=1)
+        
+        user_ids = [u.id for u in usuarios]
+        
+        despesas = Despesa.objects.filter(
+            user_id__in=user_ids,
+            cartao=self,
+            data__gte=data_inicio,
+            data__lte=data_fechamento,
+            fatura_paga=False
+        ).order_by('data')
+        
+        total = despesas.aggregate(total=Sum('valor'))['total'] or 0
+        
+        return {
+            'despesas': despesas,
+            'total': total,
+            'data_inicio': data_inicio,
+            'data_fechamento': data_fechamento,
+        }
 
 class Despesa(models.Model):
     """Representa uma despesa individual, feita por um usuário específico."""
@@ -142,11 +182,13 @@ class Investimento(models.Model):
         RENDA_FIXA = 'RF', 'Renda Fixa'
         RENDA_VARIAVEL = 'RV', 'Renda Variável'
 
-    familia = models.ForeignKey(Familia, on_delete=models.CASCADE)
+    familia = models.ForeignKey('Familia', on_delete=models.CASCADE)
     nome = models.CharField(max_length=100, help_text="Ex: Tesouro Selic 2029, Ações WEG, FII MXRF11")
     tipo = models.CharField(max_length=2, choices=TipoInvestimento.choices)
     valor_atual = models.DecimalField(max_digits=15, decimal_places=2, default=0.00, help_text="Valor de mercado atual de todo o montante investido.")
     taxa_rendimento_anual = models.DecimalField(max_digits=5, decimal_places=2, help_text="Para Renda Fixa, a taxa contratada. Para Renda Variável, uma estimativa.")
+    # --- CAMPO ADICIONADO ---
+    data_criacao = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.nome} ({self.get_tipo_display()})"
