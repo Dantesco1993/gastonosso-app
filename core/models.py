@@ -80,16 +80,31 @@ class CartaoDeCredito(models.Model):
     def __str__(self):
         return self.nome
 
-    # --- MÉTODO ATUALIZADO ---
+    # --- MÉTODO CORRIGIDO ---
     def get_fatura_aberta(self, usuarios, data_base=None):
         """Calcula o período, as despesas e o total da fatura em aberto com base em uma data."""
         if data_base is None:
             data_base = date.today()
         
-        if data_base.day <= self.dia_fechamento:
-            data_fechamento = data_base.replace(day=self.dia_fechamento)
+        # Lógica robusta para calcular a data de fechamento
+        try:
+            # Tenta criar a data de fechamento no mês da data_base
+            data_fechamento_base = data_base.replace(day=self.dia_fechamento)
+        except ValueError:
+            # Se der erro (ex: dia 31 em Fevereiro), pega o último dia do mês
+            proximo_mes = data_base.replace(day=1) + relativedelta(months=1)
+            data_fechamento_base = proximo_mes - relativedelta(days=1)
+        
+        if data_base.day <= data_fechamento_base.day:
+            data_fechamento = data_fechamento_base
         else:
-            data_fechamento = (data_base + relativedelta(months=1)).replace(day=self.dia_fechamento)
+            proximo_mes = data_base + relativedelta(months=1)
+            try:
+                data_fechamento = proximo_mes.replace(day=self.dia_fechamento)
+            except ValueError:
+                proximo_mes_seguinte = proximo_mes.replace(day=1) + relativedelta(months=1)
+                data_fechamento = proximo_mes_seguinte - relativedelta(days=1)
+                
         data_inicio = (data_fechamento - relativedelta(months=1)) + relativedelta(days=1)
         
         user_ids = [u.id for u in usuarios]

@@ -17,8 +17,8 @@ SECRET_KEY = config('SECRET_KEY')
 # DEBUG = 'RENDER' not in os.environ
 SECRET_KEY = config('SECRET_KEY')
 
-# DEBUG = 'RENDER' not in os.environ
-DEBUG = True # ATIVADO APENAS PARA DEPURAR!
+DEBUG = 'RENDER' not in os.environ
+# DEBUG = True # ATIVADO APENAS PARA DEPURAR!
 
 ALLOWED_HOSTS = []
 
