@@ -14,7 +14,13 @@ SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # O 'RENDER' é uma variável de ambiente que a plataforma Render define automaticamente.
-DEBUG = 'RENDER' not in os.environ
+# DEBUG = 'RENDER' not in os.environ
+SECRET_KEY = config('SECRET_KEY')
+
+# DEBUG = 'RENDER' not in os.environ
+DEBUG = True # ATIVADO APENAS PARA DEPURAR!
+
+ALLOWED_HOSTS = []
 
 ALLOWED_HOSTS = []
 
