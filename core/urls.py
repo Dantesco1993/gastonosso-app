@@ -50,4 +50,8 @@ urlpatterns = [
     path('configuracoes/categoria_receita/excluir/<int:id>/', views.excluir_categoria_receita, name='excluir_categoria_receita'),
     path('configuracoes/conta/excluir/<int:id>/', views.excluir_conta, name='excluir_conta'),
     path('configuracoes/cartao/excluir/<int:id>/', views.excluir_cartao, name='excluir_cartao'),
+    path('primeiros-passos/', views.primeiros_passos, name='primeiros_passos'),
+    path('primeiros-passos/concluir/', views.concluir_primeiros_passos, name='concluir_primeiros_passos'),
+
+    path('bemvindo/', views.landing_page, name='landing_page'),
 ]

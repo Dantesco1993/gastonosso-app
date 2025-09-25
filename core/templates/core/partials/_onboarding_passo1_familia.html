@@ -1,0 +1,36 @@
+{% load crispy_forms_tags %}
+
+<h4 class="card-title mb-4">Primeiro, vamos criar seu espaço familiar</h4>
+<p class="text-muted">Sua família é o espaço compartilhado onde contas, orçamentos e metas serão gerenciados. Se for usar o app sozinho, basta criar uma família só para você.</p>
+<hr>
+
+<div class="row">
+    <div class="col-md-6 mb-4 mb-md-0">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Criar uma Nova Família</h5>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="nome_familia" class="form-label">Nome da Família:</label>
+                        <input type="text" class="form-control" name="nome_familia" required>
+                    </div>
+                    <button type="submit" name="criar_familia" class="btn btn-primary">Criar e Continuar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">Entrar em uma Família</h5>
+                <p>Se você recebeu um código de convite, insira-o abaixo.</p>
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form_entrar|crispy }}
+                    <button type="submit" name="entrar_familia" class="btn btn-secondary">Entrar na Família</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

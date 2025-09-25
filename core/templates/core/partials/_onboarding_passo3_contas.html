@@ -1,0 +1,34 @@
+{% load crispy_forms_tags %}
+
+<h4 class="card-title mb-4">Finalmente, cadastre suas contas</h4>
+<p class="text-muted">Adicione pelo menos uma conta para começar a lançar suas transações. Pode ser sua carteira, conta corrente, etc.</p>
+<hr>
+
+<div class="row">
+    <div class="col-md-6">
+        <h5>Suas Contas</h5>
+        <ul class="list-group mb-3">
+            {% for conta in contas %}
+            <li class="list-group-item">{{ conta.nome }} ({{ conta.get_tipo_display }})</li>
+            {% empty %}
+            <li class="list-group-item text-muted">Nenhuma conta ainda.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <h5>Adicionar Nova Conta</h5>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form_conta|crispy }}
+            <button type="submit" name="add_conta" class="btn btn-primary w-100">Adicionar Conta</button>
+        </form>
+    </div>
+</div>
+
+<hr class="my-4">
+<form method="POST" action="{% url 'concluir_primeiros_passos' %}">
+    {% csrf_token %}
+    <div class="d-grid">
+        <button type="submit" class="btn btn-success btn-lg">Concluir e Começar a Usar!</button>
+    </div>
+</form>

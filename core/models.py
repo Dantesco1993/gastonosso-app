@@ -17,13 +17,14 @@ class Familia(models.Model):
         return self.nome
 
 class Perfil(models.Model):
-    """Estende o modelo de usuário padrão para incluir a associação a uma família."""
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     familia = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True, blank=True)
+    primeiro_acesso_concluido = models.BooleanField(default=False)
+    # NOVO CAMPO
+    etapa_onboarding = models.IntegerField(default=1, help_text="Controla a etapa do tutorial de primeiros passos.")
 
     def __str__(self):
         return self.user.username
-
 # --- Modelos de Configuração (Compartilhados pela Família) ---
 
 class Categoria(models.Model):

@@ -64,7 +64,7 @@ ROOT_URLCONF = 'financas_pessoais.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [], # Adicione o caminho aqui
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -149,7 +149,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # --- NOSSAS CONFIGURAÇÕES PERSONALIZADAS ---
 
-LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_REDIRECT_URL = 'redirect_apos_login'
 LOGIN_URL = 'login'
 LOGOUT_REDIRECT_URL = 'landing_page'
 
