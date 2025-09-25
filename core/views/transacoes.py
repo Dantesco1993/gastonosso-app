@@ -14,7 +14,7 @@ def lista_despesas(request):
     user = request.user
     familia = user.perfil.familia
     
-    visao = request.GET.get('visao', 'conjunto')
+    visao = request.GET.get('visao', 'individual')
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
     else:
@@ -120,7 +120,7 @@ def lista_receitas(request):
     user = request.user
     familia = user.perfil.familia
     
-    visao = request.GET.get('visao', 'conjunto')
+    visao = request.GET.get('visao', 'individual')
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
     else:

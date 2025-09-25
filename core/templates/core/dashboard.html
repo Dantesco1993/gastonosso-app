@@ -1,91 +1,132 @@
 {% extends 'core/base.html' %}
+{% load humanize %}
 
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
     <h1>Dashboard Financeiro</h1>
-    {% include 'core/partials/visao_seletor.html' %}
+    <div class="d-flex gap-2">
+        {% include 'core/partials/periodo_seletor.html' %}
+        {% include 'core/partials/visao_seletor.html' %}
+    </div>
 </div>
 
 <div class="row">
-    <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card text-center border-primary shadow-sm">
-            <div class="card-header bg-primary text-white">Saldo Total em Contas</div>
-            <div class="card-body">
-                <h2 class="card-title display-5 fw-bold {% if saldo_total < 0 %}text-danger{% else %}text-success{% endif %}">
-                    R$ {{ saldo_total|floatformat:2 }}
-                </h2>
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="card-title mb-0"><i class="bi bi-heart-pulse"></i> Saúde Financeira</h5>
+            </div>
+            <div class="card-body text-center d-flex flex-column justify-content-around">
+                <div>
+                    <h6 class="card-subtitle mb-2 text-muted text-uppercase small">Patrimônio Líquido</h6>
+                    <p class="card-text display-5 fw-bold text-primary">R$ {{ patrimonio_liquido|floatformat:2|intcomma }}</p>
+                </div>
+                <hr>
+                <div>
+                    <h6 class="card-subtitle mb-2 text-muted text-uppercase small">
+                        Saldo em Contas
+                        {% if periodo == 'projetado' %}
+                            <span class="fw-normal">(Projetado para {{ data_projecao|date:"d/m/Y" }})</span>
+                        {% endif %}
+                    </h6>
+                    <p class="card-text display-6 fw-bold {% if saldo_total_contas < 0 %}text-danger{% else %}text-success{% endif %}">
+                        R$ {{ saldo_total_contas|floatformat:2|intcomma }}
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card text-center border-info shadow-sm">
-            <div class="card-header bg-info text-white">Balanço do Mês</div>
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="card-title mb-0"><i class="bi bi-exclamation-triangle"></i> Itens de Atenção</h5>
+            </div>
             <div class="card-body">
-                <p class="card-text text-success mb-1"><i class="bi bi-arrow-up-circle"></i> Receitas: R$ {{ receitas_mes|floatformat:2 }}</p>
-                <p class="card-text text-danger"><i class="bi bi-arrow-down-circle"></i> Despesas: R$ {{ despesas_mes|floatformat:2 }}</p>
-                <h5 class="card-title mt-2 fw-bold {% if balanco_mensal < 0 %}text-danger{% else %}text-success{% endif %}">
-                    Balanço: R$ {{ balanco_mensal|floatformat:2 }}
-                </h5>
+                <h6 class="card-subtitle mb-2 text-muted">Balanço do Mês (Realizado)</h6>
+                <p class="fs-5 {% if balanco_mensal < 0 %}text-danger{% else %}text-success{% endif %}">
+                    Balanço: R$ {{ balanco_mensal|floatformat:2|intcomma }}
+                </p>
+                <hr>
+                <h6 class="card-subtitle mb-2 text-muted">Faturas de Cartão em Aberto</h6>
+                <ul class="list-group list-group-flush">
+                    {% for fatura in faturas %}
+                        {% if fatura.total > 0 %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center ps-0">
+                            {{ fatura.cartao.nome }}
+                            <span class="badge bg-danger rounded-pill">R$ {{ fatura.total|floatformat:2|intcomma }}</span>
+                        </li>
+                        {% endif %}
+                    {% empty %}
+                        <li class="list-group-item ps-0">Nenhuma fatura em aberto.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="card-title mb-0"><i class="bi bi-pie-chart"></i> Top 5 Categorias de Gastos (Mês Atual)</h5>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                {% if data_gastos_pie %}
+                <canvas id="gastosDashboardChart"></canvas>
+                {% else %}
+                <p class="text-muted">Sem gastos no mês para exibir.</p>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="col-lg-4 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header">Faturas de Cartão em Aberto</div>
-            {% if not faturas %}
-            <div class="card-body">
-                <p class="card-text">Nenhuma fatura em aberto.</p>
+    <div class="col-lg-6 mb-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-transparent border-0 pt-3">
+                <h5 class="card-title mb-0"><i class="bi bi-bullseye"></i> Acompanhamento de Metas</h5>
             </div>
-            {% else %}
-            <ul class="list-group list-group-flush">
-                {% for fatura in faturas %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="bi bi-credit-card"></i> {{ fatura.cartao.nome }}
+            <div class="card-body">
+                {% for meta in metas %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>{{ meta.nome }}</span>
+                        <span class="fw-bold">{{ meta.progresso_percentual|floatformat:0 }}%</span>
                     </div>
-                    <span class="badge bg-danger rounded-pill">R$ {{ fatura.total|floatformat:2 }}</span>
-                    <a href="{% url 'fatura_cartao' fatura.cartao.id %}" class="btn btn-sm btn-outline-secondary" title="Ver Fatura">
-                        <i class="bi bi-eye"></i>
-                    </a>
-                </li>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar" role="progressbar" style="width: {{ meta.progresso_percentual }}%;" aria-valuenow="{{ meta.progresso_percentual }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">Nenhuma meta financeira cadastrada. Adicione na <a href="{% url 'lista_metas' %}">página de Metas</a>.</p>
                 {% endfor %}
-            </ul>
-            {% endif %}
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header"><i class="bi bi-clock-history"></i> Atividade Recente</div>
-            <div class="table-responsive">
-                <table class="table table-striped mb-0">
-                    <tbody>
-                        {% for transacao in transacoes_recentes %}
-                        <tr>
-                            <td>{{ transacao.data|date:"d/m/Y" }}</td>
-                            <td>
-                                {% if 'receita' in transacao|lower %}
-                                <i class="bi bi-plus-circle text-success"></i>
-                                {% else %}
-                                <i class="bi bi-dash-circle text-danger"></i>
-                                {% endif %}
-                                {{ transacao }}
-                            </td>
-                            <td class="{% if 'receita' in transacao|lower %}text-success{% else %}text-danger{% endif %} fw-bold">
-                                {% if 'receita' in transacao|lower %}+{% else %}-{% endif %} R$ {{ transacao.valor|floatformat:2 }}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labelsPie = {{ labels_gastos_pie|safe }};
+    const dataPie = {{ data_gastos_pie|safe }};
+    const ctxPie = document.getElementById('gastosDashboardChart');
+
+    if (dataPie.length > 0) {
+        new Chart(ctxPie, {
+            type: 'doughnut',
+            data: {
+                labels: labelsPie,
+                datasets: [{
+                    label: 'Gastos', data: dataPie,
+                    backgroundColor: ['#0d6efd', '#6c757d', '#198754', '#dc3545', '#ffc107'],
+                    hoverOffset: 4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+        });
+    }
+</script>
 {% endblock %}

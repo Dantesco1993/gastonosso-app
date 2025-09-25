@@ -1,0 +1,8 @@
+<div class="btn-group" role="group">
+    <a href="?periodo=realizado&visao={{ visao }}" class="btn {% if periodo == 'realizado' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
+        <i class="bi bi-calendar-check"></i> Realizado
+    </a>
+    <a href="?periodo=projetado&visao={{ visao }}" class="btn {% if periodo == 'projetado' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
+        <i class="bi bi-calendar-range"></i> Projetado
+    </a>
+</div>

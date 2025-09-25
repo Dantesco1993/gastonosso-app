@@ -4,9 +4,13 @@
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-    <h1>Análise de Gastos <small class="text-muted fs-5">({{ data_inicio|date:"d/m/y" }} a {{ data_fim|date:"d/m/y" }})</small></h1>
-    {% include 'core/partials/visao_seletor.html' %}
+    <h1>Análise Financeira</h1>
+    <div class="d-flex gap-2">
+        {% include 'core/partials/periodo_seletor.html' %}
+        {% include 'core/partials/visao_seletor.html' %}
+    </div>
 </div>
+
 
 <div class="card mb-4 shadow-sm">
     <div class="card-body">

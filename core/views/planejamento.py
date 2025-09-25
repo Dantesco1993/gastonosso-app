@@ -6,7 +6,6 @@ from django.db.models import Sum
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 
-# --- IMPORTAÇÕES CORRIGIDAS ---
 from core.models import (
     Despesa, MetaFinanceira, Categoria, Conta, Investimento, 
     AporteInvestimento, CartaoDeCredito, Receita
@@ -19,22 +18,29 @@ def analise_gastos(request):
     familia = user.perfil.familia
     hoje = date.today()
 
+    # --- Lógica de Filtros ---
     data_inicio_str = request.GET.get('data_inicio')
     data_fim_str = request.GET.get('data_fim')
+    periodo = request.GET.get('periodo', 'realizado')
+    visao = request.GET.get('visao', 'individual')
 
     if data_inicio_str and data_fim_str:
         data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
         data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
     else:
+        # Padrão: Mês atual se for 'realizado', próximos 6 meses se for 'projetado'
         data_inicio = hoje.replace(day=1)
-        data_fim = hoje + relativedelta(months=1, day=1) - relativedelta(days=1)
+        if periodo == 'projetado':
+            data_fim = hoje + relativedelta(months=6)
+        else:
+            data_fim = hoje + relativedelta(months=1, day=1) - relativedelta(days=1)
 
-    visao = request.GET.get('visao', 'conjunto')
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
     else:
         usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
 
+    # --- Cálculo para Gráfico de Pizza (sempre usa o filtro de data) ---
     gastos_por_categoria = Despesa.objects.filter(
         user__in=usuarios_a_filtrar, 
         data__range=[data_inicio, data_fim]
@@ -43,23 +49,35 @@ def analise_gastos(request):
     labels_pie = [gasto['categoria__nome'] for gasto in gastos_por_categoria]
     data_pie = [float(gasto['total']) for gasto in gastos_por_categoria]
 
+    # --- Lógica de Fluxo de Caixa (passado recente e projeção futura) ---
     fluxo_caixa_data = []
-    for i in range(12):
-        mes_alvo = hoje - relativedelta(months=i)
-        receitas_mes = Receita.objects.filter(user__in=usuarios_a_filtrar, data__year=mes_alvo.year, data__month=mes_alvo.month).aggregate(total=Sum('valor'))['total'] or 0
-        despesas_mes = Despesa.objects.filter(user__in=usuarios_a_filtrar, data__year=mes_alvo.year, data__month=mes_alvo.month, conta__isnull=False).aggregate(total=Sum('valor'))['total'] or 0
-        fluxo_caixa_data.append({'mes': mes_alvo.strftime('%b/%y'), 'receitas': float(receitas_mes), 'despesas': float(despesas_mes)})
+    # Mostra 6 meses passados e 6 meses futuros
+    for i in range(-6, 7): 
+        mes_alvo = hoje + relativedelta(months=i)
+        
+        filtro_data_mes = {'data__year': mes_alvo.year, 'data__month': mes_alvo.month}
+        # Se o período for 'realizado', só considera até hoje
+        if periodo == 'realizado' and mes_alvo.year == hoje.year and mes_alvo.month == hoje.month:
+            filtro_data_mes['data__lte'] = hoje
+
+        receitas_mes = Receita.objects.filter(user__in=usuarios_a_filtrar, **filtro_data_mes).aggregate(total=Sum('valor'))['total'] or 0
+        despesas_mes = Despesa.objects.filter(user__in=usuarios_a_filtrar, conta__isnull=False, **filtro_data_mes).aggregate(total=Sum('valor'))['total'] or 0
+        
+        fluxo_caixa_data.append({
+            'mes': mes_alvo.strftime('%b/%y'),
+            'receitas': float(receitas_mes),
+            'despesas': float(despesas_mes)
+        })
     
-    fluxo_caixa_data.reverse()
     labels_bar = [item['mes'] for item in fluxo_caixa_data]
     data_receitas_bar = [item['receitas'] for item in fluxo_caixa_data]
     data_despesas_bar = [item['despesas'] for item in fluxo_caixa_data]
 
     contexto = {
-        'gastos_por_categoria': gastos_por_categoria,
-        'labels_pie': labels_pie, 'data_pie': data_pie, 'visao': visao,
-        'data_inicio': data_inicio, 'data_fim': data_fim, 'familia': familia,
-        'labels_bar': labels_bar, 'data_receitas_bar': data_receitas_bar, 'data_despesas_bar': data_despesas_bar,
+        'gastos_por_categoria': gastos_por_categoria, 'labels_pie': labels_pie, 'data_pie': data_pie,
+        'visao': visao, 'periodo': periodo, 'data_inicio': data_inicio, 'data_fim': data_fim,
+        'familia': familia, 'labels_bar': labels_bar, 'data_receitas_bar': data_receitas_bar,
+        'data_despesas_bar': data_despesas_bar,
     }
     return render(request, 'core/analise_gastos.html', contexto)
 
@@ -177,43 +195,37 @@ def evolucao_patrimonio(request):
     familia = user.perfil.familia
     hoje = date.today()
 
-    visao = request.GET.get('visao', 'conjunto')
+    visao = request.GET.get('visao', 'individual')
+    periodo = request.GET.get('periodo', 'realizado')
+
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
     else:
         usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
     
     patrimonio_data = []
-    for i in range(12):
-        ponto_no_tempo = hoje - relativedelta(months=i)
+    # Calcula 6 meses no passado e projeta 6 meses no futuro
+    for i in range(-6, 7):
+        ponto_no_tempo = hoje + relativedelta(months=i)
         ultimo_dia_mes = ponto_no_tempo.replace(day=1) + relativedelta(months=1) - relativedelta(days=1)
+
+        # Na visão 'realizado', não calculamos para meses futuros
+        if periodo == 'realizado' and ponto_no_tempo > hoje:
+            continue
+
+        data_limite = ultimo_dia_mes if periodo == 'projetado' else min(ultimo_dia_mes, hoje)
 
         # 1. Ativos em Contas
         contas = Conta.objects.filter(familia=familia) if familia else []
-        saldo_contas = 0
-        for conta in contas:
-            # Precisamos ajustar o get_saldo_atual para aceitar data_base
-            receitas = Receita.objects.filter(user__in=usuarios_a_filtrar, conta=conta, data__lte=ultimo_dia_mes).aggregate(total=Sum('valor'))['total'] or 0
-            despesas = Despesa.objects.filter(user__in=usuarios_a_filtrar, conta=conta, data__lte=ultimo_dia_mes).aggregate(total=Sum('valor'))['total'] or 0
-            saldo_contas += (conta.saldo_inicial + receitas) - despesas
+        saldo_contas = sum(c.get_saldo_atual(usuarios=usuarios_a_filtrar, data_base=data_limite) for c in contas)
         
         # 2. Ativos em Investimentos (valor aportado até a data)
-        investimentos = Investimento.objects.filter(familia=familia, data_criacao__lte=ultimo_dia_mes) if familia else []
-        valor_investido = 0
-        for investimento in investimentos:
-            aportes = AporteInvestimento.objects.filter(
-                user__in=usuarios_a_filtrar,
-                investimento=investimento,
-                data__lte=ultimo_dia_mes
-            ).aggregate(total=Sum('valor'))['total'] or 0
-            valor_investido += aportes
+        investimentos = Investimento.objects.filter(familia=familia, data_criacao__lte=data_limite) if familia else []
+        valor_investido = sum(inv.aportes.filter(user__in=usuarios_a_filtrar, data__lte=data_limite).aggregate(t=Sum('valor'))['t'] or 0 for inv in investimentos)
 
         # 3. Dívidas em Cartões
         cartoes = CartaoDeCredito.objects.filter(familia=familia) if familia else []
-        divida_cartoes = 0
-        for cartao in cartoes:
-            fatura = cartao.get_fatura_aberta(usuarios=usuarios_a_filtrar, data_base=ultimo_dia_mes)
-            divida_cartoes += fatura['total']
+        divida_cartoes = sum(c.get_fatura_aberta(usuarios=usuarios_a_filtrar, data_base=ultimo_dia_mes)['total'] for c in cartoes)
 
         patrimonio_liquido = (saldo_contas + valor_investido) - divida_cartoes
         patrimonio_data.append({
@@ -221,15 +233,12 @@ def evolucao_patrimonio(request):
             'valor': float(patrimonio_liquido)
         })
 
-    patrimonio_data.reverse()
     labels = [item['mes'] for item in patrimonio_data]
     data = [item['valor'] for item in patrimonio_data]
 
     contexto = {
-        'labels': labels,
-        'data': data,
+        'labels': labels, 'data': data,
         'patrimonio_atual': patrimonio_data[-1]['valor'] if patrimonio_data else 0,
-        'visao': visao,
-        'familia': familia,
+        'visao': visao, 'periodo': periodo, 'familia': familia,
     }
     return render(request, 'core/evolucao_patrimonio.html', contexto)

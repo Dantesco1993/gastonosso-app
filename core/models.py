@@ -60,14 +60,11 @@ class CategoriaReceita(models.Model):
         return self.nome
 
 class Conta(models.Model):
-    """Contas bancárias ou carteiras, compartilhadas pela família."""
     familia = models.ForeignKey('Familia', on_delete=models.CASCADE)
-    
     class TipoConta(models.TextChoices):
         CARTEIRA = 'CA', 'Carteira'
         CONTA_CORRENTE = 'CC', 'Conta Corrente'
         POUPANCA = 'PO', 'Poupança'
-        
     nome = models.CharField(max_length=100)
     tipo = models.CharField(max_length=2, choices=TipoConta.choices, default=TipoConta.CONTA_CORRENTE)
     saldo_inicial = models.DecimalField(max_digits=15, decimal_places=2, default=0.00)
@@ -75,15 +72,27 @@ class Conta(models.Model):
     def __str__(self):
         return self.nome
 
+    # --- MÉTODO ATUALIZADO ---
     def get_saldo_atual(self, usuarios, data_base=None):
-        """Calcula o saldo realizado da conta com base em uma lista de usuários e uma data de referência."""
+        """
+        Calcula o saldo realizado da conta com base em uma lista de usuários
+        até uma data de referência (data_base).
+        """
         if data_base is None:
             data_base = date.today()
         
         user_ids = [u.id for u in usuarios]
         
-        receitas = Receita.objects.filter(user_id__in=user_ids, conta=self, data__lte=data_base).aggregate(total=Sum('valor'))['total'] or 0
-        despesas = Despesa.objects.filter(user_id__in=user_ids, conta=self, data__lte=data_base).aggregate(total=Sum('valor'))['total'] or 0
+        # O filtro de data agora usa exclusivamente a data_base fornecida
+        filtro_data = models.Q(data__lte=data_base)
+
+        receitas = Receita.objects.filter(
+            filtro_data, user_id__in=user_ids, conta=self
+        ).aggregate(total=Sum('valor'))['total'] or 0
+        
+        despesas = Despesa.objects.filter(
+            filtro_data, user_id__in=user_ids, conta=self
+        ).aggregate(total=Sum('valor'))['total'] or 0
         
         return (self.saldo_inicial + receitas) - despesas
 
