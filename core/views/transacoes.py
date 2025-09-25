@@ -168,6 +168,21 @@ def excluir_receita(request, id):
     return redirect('lista_receitas')
 
 @login_required
+def editar_receita(request, id):
+    receita = get_object_or_404(Receita, id=id, user=request.user)
+    if request.method == 'POST':
+        form = ReceitaForm(request.POST, instance=receita, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Receita atualizada com sucesso!')
+            return redirect('lista_receitas')
+    else:
+        form = ReceitaForm(instance=receita, user=request.user)
+    
+    contexto = {'form': form, 'receita': receita}
+    return render(request, 'core/editar_receita.html', contexto)
+
+@login_required
 def adicionar_receita_recorrente(request):
     user = request.user
     if request.method == 'POST':

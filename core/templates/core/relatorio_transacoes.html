@@ -1,0 +1,98 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block title %}Relatório de Transações{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h1>Relatório de Transações</h1>
+    {% include 'core/partials/visao_seletor.html' %}
+</div>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <form method="GET" action="{% url 'relatorio_transacoes' %}">
+            <div class="row g-3 align-items-end">
+                <div class="col-md">
+                    <label for="data_inicio" class="form-label">Data de Início</label>
+                    <input type="date" class="form-control" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md">
+                    <label for="data_fim" class="form-label">Data de Fim</label>
+                    <input type="date" class="form-control" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}">
+                </div>
+                <input type="hidden" name="visao" value="{{ visao }}">
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-center text-bg-success">
+            <div class="card-body">
+                <h6 class="card-subtitle">Total de Entradas</h6>
+                <h4 class="card-title">R$ {{ total_receitas|floatformat:2|intcomma }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center text-bg-danger">
+            <div class="card-body">
+                <h6 class="card-subtitle">Total de Saídas</h6>
+                <h4 class="card-title">R$ {{ total_despesas|floatformat:2|intcomma }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center {% if saldo_periodo < 0 %}text-bg-warning{% else %}text-bg-primary{% endif %}">
+            <div class="card-body">
+                <h6 class="card-subtitle">Saldo do Período</h6>
+                <h4 class="card-title">R$ {{ saldo_periodo|floatformat:2|intcomma }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">Extrato Geral</div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Descrição</th>
+                    {% if visao == 'conjunto' %}<th>Autor</th>{% endif %}
+                    <th>Categoria</th>
+                    <th class="text-end">Valor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transacao in page_obj %}
+                <tr>
+                    <td>{{ transacao.data|date:"d/m/Y" }}</td>
+                    <td>{{ transacao }}</td>
+                    {% if visao == 'conjunto' %}<td>{{ transacao.user.username }}</td>{% endif %}
+                    <td><span class="badge bg-secondary">{{ transacao.categoria }}</span></td>
+                    <td class="text-end fw-bold {% if transacao.get_tipo_display == 'Receita' %}text-success{% else %}text-danger{% endif %}">
+                        {% if transacao.get_tipo_display == 'Receita' %}+{% else %}-{% endif %}
+                        R$ {{ transacao.valor|floatformat:2|intcomma }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="{% if visao == 'conjunto' %}5{% else %}4{% endif %}" class="text-center p-5">Nenhuma transação encontrada para o período.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-4">
+    {% include 'core/partials/paginator.html' %}
+</div>
+{% endblock %}

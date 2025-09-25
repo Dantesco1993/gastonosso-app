@@ -13,14 +13,8 @@
             <table class="table table-striped table-hover mb-0">
                 <thead>
                     <tr>
-                        <th>Descrição</th>
-                        <th>Valor</th>
-                        <th>Data</th>
-                        <th>Categoria</th>
-                        <th>Conta</th>
-                        {% if visao == 'conjunto' %}
-                        <th>Autor</th>
-                        {% endif %}
+                        <th>Descrição</th><th>Valor</th><th>Data</th><th>Categoria</th><th>Conta</th>
+                        {% if visao == 'conjunto' %}<th>Autor</th>{% endif %}
                         <th>Ações</th>
                     </tr>
                 </thead>
@@ -32,10 +26,11 @@
                         <td>{{ receita.data|date:"d/m/Y" }}</td>
                         <td><span class="badge bg-secondary">{{ receita.categoria.nome }}</span></td>
                         <td>{{ receita.conta.nome }}</td>
-                        {% if visao == 'conjunto' %}
-                        <td>{{ receita.user.username }}</td>
-                        {% endif %}
+                        {% if visao == 'conjunto' %}<td>{{ receita.user.username }}</td>{% endif %}
                         <td>
+                            <a href="{% url 'editar_receita' receita.id %}" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
                             <a href="{% url 'excluir_receita' receita.id %}" class="btn btn-sm btn-outline-danger" title="Excluir" onclick="return confirm('Tem certeza?');">
                                 <i class="bi bi-trash3"></i>
                             </a>

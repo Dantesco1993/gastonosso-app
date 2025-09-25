@@ -170,3 +170,18 @@ class AporteForm(forms.Form):
             self.fields['conta_origem'].queryset = Conta.objects.filter(familia=user.perfil.familia)
         else:
             self.fields['conta_origem'].queryset = Conta.objects.none()
+            
+class CategoriaForm(forms.ModelForm):
+    class Meta:
+        model = Categoria
+        # Adicione o novo campo ao formulário
+        fields = ['nome', 'orcamento_mensal', 'categoria_mae', 'macro_categoria']
+
+    def __init__(self, *args, **kwargs):
+        familia = kwargs.pop('familia', None)
+        super().__init__(*args, **kwargs)
+        if familia:
+            self.fields['categoria_mae'].queryset = Categoria.objects.filter(
+                familia=familia, 
+                categoria_mae__isnull=True
+            )

@@ -35,16 +35,16 @@
     <div class="card-body">
         <div class="tab-content" id="configTabsContent">
             <div class="tab-pane fade {% if active_tab == 'cat-despesas' %}show active{% endif %}" id="cat-despesas" role="tabpanel">
-                {% include 'core/partials/config_panel.html' with title="Categorias de Despesa" items=categorias_principais form=form_categoria form_name="form_categoria" delete_url_name="excluir_categoria" tab_id="cat-despesas" %}
+                {% include 'core/partials/config_panel.html' with title="Categorias de Despesa" items=categorias_principais form=form_categoria form_name="form_categoria" delete_url_name="excluir_categoria" edit_url_name=None tab_id="cat-despesas" %}
             </div>
             <div class="tab-pane fade {% if active_tab == 'cat-receitas' %}show active{% endif %}" id="cat-receitas" role="tabpanel">
-                {% include 'core/partials/config_panel.html' with title="Categorias de Receita" items=categorias_receita form=form_categoria_receita form_name="form_categoria_receita" delete_url_name="excluir_categoria_receita" tab_id="cat-receitas" %}
+                {% include 'core/partials/config_panel.html' with title="Categorias de Receita" items=categorias_receita form=form_categoria_receita form_name="form_categoria_receita" delete_url_name="excluir_categoria_receita" edit_url_name=None tab_id="cat-receitas" %}
             </div>
             <div class="tab-pane fade {% if active_tab == 'contas' %}show active{% endif %}" id="contas" role="tabpanel">
-                {% include 'core/partials/config_panel.html' with title="Contas" items=contas form=form_conta form_name="form_conta" delete_url_name="excluir_conta" tab_id="contas" %}
+                {% include 'core/partials/config_panel.html' with title="Contas" items=contas form=form_conta form_name="form_conta" delete_url_name="excluir_conta" edit_url_name="editar_conta" list_url_name="lista_contas" tab_id="contas" %}
             </div>
             <div class="tab-pane fade {% if active_tab == 'cartoes' %}show active{% endif %}" id="cartoes" role="tabpanel">
-                {% include 'core/partials/config_panel.html' with title="Cartões de Crédito" items=cartoes form=form_cartao form_name="form_cartao" delete_url_name="excluir_cartao" tab_id="cartoes" %}
+                {% include 'core/partials/config_panel.html' with title="Cartões de Crédito" items=cartoes form=form_cartao form_name="form_cartao" delete_url_name="excluir_cartao" edit_url_name="editar_cartao" list_url_name="lista_cartoes" tab_id="cartoes" %}
             </div>
         </div>
     </div>

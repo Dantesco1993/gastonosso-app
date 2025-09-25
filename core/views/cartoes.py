@@ -83,3 +83,19 @@ def pagar_fatura(request, cartao_id):
                 messages.warning(request, 'Não havia saldo em aberto para pagar nesta fatura.')
 
     return redirect('fatura_cartao', id=cartao_id)
+
+# Adicione esta view no final do arquivo core/views/cartoes.py
+@login_required
+def editar_cartao(request, id):
+    familia = request.user.perfil.familia
+    cartao = get_object_or_404(CartaoDeCredito, id=id, familia=familia)
+    if request.method == 'POST':
+        form = CartaoDeCreditoForm(request.POST, instance=cartao)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cartão atualizado com sucesso!')
+            return redirect('lista_cartoes')
+    else:
+        form = CartaoDeCreditoForm(instance=cartao)
+    contexto = {'form': form, 'instance': cartao}
+    return render(request, 'core/editar_generico.html', contexto)

@@ -29,21 +29,28 @@ class Perfil(models.Model):
 
 class Categoria(models.Model):
     """Categorias de despesa, compartilhadas pela família, com suporte a hierarquia."""
+    
+    class MacroCategoria(models.TextChoices):
+        NECESSIDADE = 'NE', 'Necessidade'
+        DESEJO = 'DE', 'Desejo Pessoal'
+        META = 'ME', 'Meta Financeira'
+        NAO_CLASSIFICADO = 'NC', 'Não Classificado'
+
     familia = models.ForeignKey('Familia', on_delete=models.CASCADE)
     nome = models.CharField(max_length=100)
     orcamento_mensal = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2, 
-        default=0.00, 
+        max_digits=10, decimal_places=2, default=0.00, 
         help_text="Defina um limite de gastos mensal para esta categoria."
     )
     categoria_mae = models.ForeignKey(
-        'self', 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True, 
-        related_name='subcategorias',
-        verbose_name="Categoria Principal"
+        'self', on_delete=models.CASCADE, null=True, blank=True, 
+        related_name='subcategorias', verbose_name="Categoria Principal"
+    )
+    # --- NOVO CAMPO PARA O ORÇAMENTO 50/30/20 ---
+    macro_categoria = models.CharField(
+        max_length=2,
+        choices=MacroCategoria.choices,
+        default=MacroCategoria.NAO_CLASSIFICADO
     )
     
     def __str__(self):
