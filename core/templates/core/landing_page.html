@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Meu Dinheiro - Controle Financeiro Inteligente</title>
+  <title>Plenus - Sua Jornada para a Plenitude Financeira</title> {# Título da página atualizado #}
   {% load static %}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -17,11 +17,11 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
     <div class="container">
       <a class="navbar-brand fw-bold" href="#">
-        <i class="bi bi-wallet2"></i> Meu Dinheiro
+        <i class="bi bi-wallet2"></i> Plenus {# Nome do produto no cabeçalho #}
       </a>
       <div class="d-flex">
         <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Entrar</a>
-        <a href="{% url 'register' %}" class="btn btn-primary">Criar Conta Grátis</a>
+        <a href="{% url 'register' %}" class="btn btn-primary">Começar Jornada</a> {# CTA no cabeçalho #}
       </div>
     </div>
   </nav>
@@ -33,10 +33,10 @@
           <img src="{% static 'images/landing/hero-illustration.svg' %}" class="d-block mx-lg-auto img-fluid" alt="Planejamento Financeiro">
         </div>
         <div class="col-lg-6">
-          <h1 class="display-4 fw-bold text-body-emphasis lh-1 mb-3">O Fim das Planilhas. O Começo do Controle.</h1>
-          <p class="lead">Organize suas finanças, planeje em família e alcance suas metas com a ferramenta mais intuitiva que você já usou. Recupere a paz de espírito financeira.</p>
+          <h1 class="display-4 fw-bold text-body-emphasis lh-1 mb-3">Plenitude Financeira ao Seu Alcance.</h1> {# Novo H1 #}
+          <p class="lead">Com o Plenus, transforme sua relação com o dinheiro. Planeje com clareza, prospere em família e construa o futuro que você sempre sonhou, sem complicações.</p> {# Novo parágrafo de apoio #}
           <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
-            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 me-md-2">Criar minha conta gratuita</a>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 me-md-2">Inicie sua Jornada Plenus</a> {# CTA principal #}
           </div>
         </div>
       </div>
@@ -44,13 +44,13 @@
   </header>
   
   <main>
-
+    
     <div class="container px-4 py-5">
       <hr class="featurette-divider">
       <div class="row featurette align-items-center">
         <div class="col-md-7">
-          <h2 class="featurette-heading fw-normal lh-1">Um dashboard que te dá clareza. <span class="text-muted">Tudo em um só lugar.</span></h2>
-          <p class="lead">Veja seu patrimônio, saldos, orçamentos e últimas transações em uma tela única e intuitiva. Alterne entre sua visão pessoal e a da família com um clique.</p>
+          <h2 class="featurette-heading fw-normal lh-1">Visualize seu mundo financeiro. <span class="text-muted">Desbloqueie insights.</span></h2> {# Título atualizado #}
+          <p class="lead">O dashboard intuitivo do Plenus transforma números em clareza, mostrando seu patrimônio, fluxo de caixa e progressos em um piscar de olhos. Tome decisões mais inteligentes.</p> {# Texto atualizado #}
         </div>
         <div class="col-md-5">
           <img src="{% static 'images/landing/feature-dashboard.png' %}" class="featurette-image img-fluid mx-auto" alt="Dashboard da Aplicação">
@@ -59,8 +59,8 @@
       <hr class="featurette-divider">
       <div class="row featurette align-items-center">
         <div class="col-md-7 order-md-2">
-          <h2 class="featurette-heading fw-normal lh-1">Planeje o futuro. <span class="text-muted">Não apenas registre o passado.</span></h2>
-          <p class="lead">Crie orçamentos mensais por categoria, defina metas financeiras com acompanhamento visual e projete o rendimento dos seus investimentos com nossa calculadora de juros compostos.</p>
+          <h2 class="featurette-heading fw-normal lh-1">Construa seu legado. <span class="text-muted">Prospere em cada etapa.</span></h2> {# Título atualizado #}
+          <p class="lead">Com o Plenus, defina e alcance metas ambiciosas, otimize seus investimentos e projete um futuro financeiro sólido, seja individualmente ou em conjunto com sua família.</p> {# Texto atualizado #}
         </div>
         <div class="col-md-5 order-md-1">
           <img src="{% static 'images/landing/feature-planning.png' %}" class="featurette-image img-fluid mx-auto" alt="Página de Orçamento">
@@ -71,12 +71,12 @@
 
     <div class="bg-light">
         <div class="container px-4 py-5">
-            <h2 class="text-center mb-5">O que nossos usuários dizem</h2>
+            <h2 class="text-center mb-5">Quem já alcançou a plenitude com Plenus?</h2> {# Título dos depoimentos #}
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 border-0 shadow-sm testimonial-card">
                         <div class="card-body">
-                            <p class="card-text">"Finalmente uma ferramenta que meu marido e eu conseguimos usar juntos! A visão de família é fantástica e acabou com as discussões sobre o orçamento."</p>
+                            <p class="card-text">"O Plenus mudou a dinâmica financeira da nossa casa. Conseguimos alinhar nossos objetivos e, pela primeira vez, vemos nosso futuro com clareza."</p> {# Depoimento atualizado #}
                             <footer class="blockquote-footer mt-2">Ana P., Designer</footer>
                         </div>
                     </div>
@@ -84,7 +84,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 border-0 shadow-sm testimonial-card">
                         <div class="card-body">
-                            <p class="card-text">"O gráfico de patrimônio líquido é viciante. Ver meu patrimônio crescendo mês a mês me motiva a continuar investindo e cortando gastos desnecessários."</p>
+                            <p class="card-text">"Ver o crescimento do meu patrimônio com o Plenus é incrivelmente motivador. É mais que um app, é um parceiro na construção da minha liberdade financeira."</p> {# Depoimento atualizado #}
                             <footer class="blockquote-footer mt-2">Marcos L., Desenvolvedor</footer>
                         </div>
                     </div>
@@ -92,7 +92,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 border-0 shadow-sm testimonial-card">
                         <div class="card-body">
-                            <p class="card-text">"Simples, direto e sem a complexidade dos grandes bancos. Cadastrar uma despesa recorrente leva 10 segundos. Recomendo!"</p>
+                            <p class="card-text">"A simplicidade e o poder do Plenus me surpreenderam. Finalmente tenho uma visão completa e sem dores de cabeça para gerenciar minhas finanças."</p> {# Depoimento atualizado #}
                             <footer class="blockquote-footer mt-2">Julia S., Autônoma</footer>
                         </div>
                     </div>
@@ -102,40 +102,40 @@
     </div>
     
     <div class="container px-4 py-5">
-        <h2 class="text-center mb-5">Perguntas Frequentes</h2>
+        <h2 class="text-center mb-5">Dúvidas Comuns sobre o Plenus</h2> {# Título FAQ #}
         <div class="accordion" id="faqAccordion">
             <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">É seguro colocar meus dados financeiros aqui?</button></h2>
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">O Plenus é seguro para meus dados financeiros?</button></h2> {# Pergunta atualizada #}
                 <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body"><strong>Sim.</strong> Este é um projeto de portfólio e usa as melhores práticas de segurança do Django, mas recomendamos o uso de dados fictícios. A aplicação online é hospedada em servidores seguros e o banco de dados é protegido.</div>
+                    <div class="accordion-body"><strong>Sim.</strong> Este é um projeto de portfólio e usa as melhores práticas de segurança do Django, mas recomendamos o uso de dados fictícios para sua tranquilidade. A aplicação online é hospedada em servidores seguros e o banco de dados é protegido.</div>
                 </div>
             </div>
             <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">Posso realmente usar com minha família?</button></h2>
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">Posso gerenciar minhas finanças em conjunto com minha família no Plenus?</button></h2> {# Pergunta atualizada #}
                 <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body"><strong>Com certeza!</strong> O sistema foi projetado para isso. Após criar sua conta e sua "Família", você recebe um código de convite. Basta compartilhá-lo para que outros membros se cadastrem e entrem no seu espaço compartilhado.</div>
+                    <div class="accordion-body"><strong>Com certeza!</strong> O Plenus foi projetado com a família em mente. Após criar sua conta e sua "Família", você recebe um código de convite. Basta compartilhá-lo para que outros membros se cadastrem e entrem no seu espaço compartilhado, facilitando o planejamento conjunto.</div>
                 </div>
             </div>
             <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">Preciso instalar alguma coisa?</button></h2>
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">Preciso instalar algo para usar o Plenus?</button></h2> {# Pergunta atualizada #}
                 <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body"><strong>Não!</strong> A aplicação é 100% online. Você pode acessá-la de qualquer navegador, seja no computador, tablet ou celular.</div>
+                    <div class="accordion-body"><strong>Não!</strong> O Plenus é 100% online. Você pode acessá-lo de qualquer navegador moderno, seja no computador, tablet ou celular, sem necessidade de instalações.</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="container text-center py-5">
-        <h2 class="display-6 fw-bold">Pronto para transformar sua vida financeira?</h2>
-        <p class="lead my-4">Crie sua conta gratuita e comece a ter clareza e controle hoje mesmo.</p>
-        <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">Começar Gratuitamente</a>
+        <h2 class="display-6 fw-bold">Pronto para sua Plenitude Financeira?</h2> {# Título CTA final #}
+        <p class="lead my-4">Comece sua jornada com o Plenus agora. É simples, intuitivo e gratuito para você dar o primeiro passo.</p> {# Texto CTA final #}
+        <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">Experimente o Plenus Gratuitamente</a> {# CTA final #}
     </div>
   </main>
   
   <footer class="text-muted py-5 bg-dark-subtle">
     <div class="container">
       <p class="float-end mb-1"><a href="#">Voltar ao topo</a></p>
-      <p class="mb-1">© {% now "Y" %} Meu Dinheiro.</p>
+      <p class="mb-1">© {% now "Y" %} Plenus.</p> {# Nome no rodapé #}
       <p class="mb-0">Construído com Python e Django.</p>
     </div>
   </footer>
