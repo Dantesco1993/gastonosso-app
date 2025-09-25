@@ -34,8 +34,10 @@ urlpatterns = [
     path('analise/', views.analise_gastos, name='analise_gastos'),
     path('patrimonio/', views.evolucao_patrimonio, name='evolucao_patrimonio'),
     path('orcamento/', views.orcamento_mensal, name='orcamento_mensal'), # <<< LINHA ADICIONADA
+    path('analise/drilldown_categoria/', views.analise_drilldown_categoria, name='analise_drilldown_categoria'),
     path('metas/', views.lista_metas, name='lista_metas'),
     path('metas/<int:id>/aporte/', views.adicionar_aporte, name='adicionar_aporte'),
+    
 
     # --- URLs de Investimentos ---
     path('investimentos/', views.lista_investimentos, name='lista_investimentos'),
@@ -52,6 +54,8 @@ urlpatterns = [
     path('configuracoes/cartao/excluir/<int:id>/', views.excluir_cartao, name='excluir_cartao'),
     path('primeiros-passos/', views.primeiros_passos, name='primeiros_passos'),
     path('primeiros-passos/concluir/', views.concluir_primeiros_passos, name='concluir_primeiros_passos'),
-
+    path('redirect/', views.redirect_apos_login, name='redirect_apos_login'),
     path('bemvindo/', views.landing_page, name='landing_page'),
+    
+    
 ]

@@ -1,0 +1,38 @@
+<div class="card h-100 shadow-sm">
+    <div class="card-header">
+        <h5>Detalhes de: <strong>{{ categoria_mae_nome }}</strong></h5>
+    </div>
+    <div class="card-body d-flex align-items-center justify-content-center">
+        {% if data %}
+        <canvas id="drilldownChart"></canvas>
+        {% else %}
+        <p class="text-muted">Sem gastos em subcategorias para exibir neste período.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if data %}
+<script>
+    const labelsDrilldown = {{ labels|safe }};
+    const dataDrilldown = {{ data|safe }};
+    const ctxDrilldown = document.getElementById('drilldownChart');
+
+    new Chart(ctxDrilldown, {
+        type: 'pie',
+        data: {
+            labels: labelsDrilldown,
+            datasets: [{
+                label: 'Gastos',
+                data: dataDrilldown,
+                backgroundColor: [ /* ... Cole aqui sua paleta de cores ... */ ],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { position: 'right' } }
+        }
+    });
+</script>
+{% endif %}

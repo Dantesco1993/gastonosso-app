@@ -1,4 +1,5 @@
 {% extends 'core/base.html' %}
+{% load humanize %}
 
 {% block title %}Análise Financeira{% endblock %}
 
@@ -11,20 +12,28 @@
     </div>
 </div>
 
-
 <div class="card mb-4 shadow-sm">
     <div class="card-body">
         <form method="GET" action="{% url 'analise_gastos' %}">
             <div class="row g-3 align-items-end">
                 <div class="col-md">
                     <label for="data_inicio" class="form-label">Data de Início</label>
-                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}">
+                    <input type="date" class="form-control" name="data_inicio" value="{{ data_inicio|date:'Y-m-d' }}">
                 </div>
                 <div class="col-md">
                     <label for="data_fim" class="form-label">Data de Fim</label>
-                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}">
+                    <input type="date" class="form-control" name="data_fim" value="{{ data_fim|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md">
+                    <label for="agrupamento" class="form-label">Agrupar por:</label>
+                    <select name="agrupamento" class="form-select">
+                        <option value="mensal" {% if agrupamento == 'mensal' %}selected{% endif %}>Mês</option>
+                        <option value="semanal" {% if agrupamento == 'semanal' %}selected{% endif %}>Semana</option>
+                        <option value="diario" {% if agrupamento == 'diario' %}selected{% endif %}>Dia</option>
+                    </select>
                 </div>
                 <input type="hidden" name="visao" value="{{ visao }}">
+                <input type="hidden" name="periodo" value="{{ periodo }}">
                 <div class="col-md-auto">
                     <button type="submit" class="btn btn-primary w-100">Filtrar</button>
                 </div>
@@ -34,10 +43,11 @@
 </div>
 
 <div class="row">
-    <div class="col-lg-5 mb-4">
+    <div class="col-lg-6 mb-4">
         <div class="card h-100 shadow-sm">
             <div class="card-header">
-                <h5>Gastos por Categoria no Período</h5>
+                <h5>Gastos por Categoria Principal</h5>
+                <small class="text-muted">{{ data_inicio|date:"d/m/y" }} a {{ data_fim|date:"d/m/y" }}</small>
             </div>
             <div class="card-body d-flex align-items-center justify-content-center">
                 <canvas id="gastosPorCategoriaChart"></canvas>
@@ -45,34 +55,22 @@
         </div>
     </div>
 
-    <div class="col-lg-7 mb-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-header">
-                <h5>Resumo por Categoria</h5>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-striped mb-0">
-                    <thead>
-                        <tr>
-                            <th>Categoria</th>
-                            <th>Total Gasto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for gasto in gastos_por_categoria %}
-                        <tr>
-                            <td>{{ gasto.categoria__nome }}</td>
-                            <td>R$ {{ gasto.total|floatformat:2 }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="2" class="text-center p-4">Nenhum gasto registrado neste período.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <div class="col-lg-6 mb-4">
+        <div id="drilldown-container">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                    <i class="bi bi-graph-up" style="font-size: 4rem; color: #6c757d;"></i>
+                    <h5 class="mt-3">Detalhes da Categoria</h5>
+                    <p class="text-muted">Clique em uma fatia do gráfico à esquerda para ver os detalhes das subcategorias aqui.</p>
+                </div>
             </div>
         </div>
+        <button id="htmx-drilldown-trigger"
+                hx-get="{% url 'analise_drilldown_categoria' %}"
+                hx-target="#drilldown-container"
+                hx-swap="innerHTML"
+                class="d-none">
+        </button>
     </div>
 </div>
 
@@ -80,7 +78,7 @@
     <div class="col-12">
         <div class="card shadow-sm">
             <div class="card-header">
-                <h5>Fluxo de Caixa Mensal (Últimos 12 Meses)</h5>
+                <h5>Evolução de Receitas vs. Despesas</h5>
             </div>
             <div class="card-body">
                 <canvas id="fluxoCaixaChart"></canvas>
@@ -98,33 +96,42 @@
     const ctxPie = document.getElementById('gastosPorCategoriaChart');
 
     let chartStatusPie = Chart.getChart("gastosPorCategoriaChart");
-    if (chartStatusPie != undefined) {
-      chartStatusPie.destroy();
-    }
+    if (chartStatusPie != undefined) { chartStatusPie.destroy(); }
 
-    new Chart(ctxPie, {
+    const pieChart = new Chart(ctxPie, {
         type: 'doughnut',
         data: {
             labels: labelsPie,
             datasets: [{
-                label: 'Gastos por Categoria',
-                data: dataPie,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.8)','rgba(54, 162, 235, 0.8)','rgba(255, 206, 86, 0.8)',
-                    'rgba(75, 192, 192, 0.8)','rgba(153, 102, 255, 0.8)','rgba(255, 159, 64, 0.8)',
-                    'rgba(199, 199, 199, 0.8)','rgba(83, 102, 255, 0.8)'
-                ],
-                borderColor: 'rgba(255, 255, 255, 1)',
-                borderWidth: 2
+                label: 'Gastos', data: dataPie,
+                backgroundColor: ['#0d6efd', '#6c757d', '#198754', '#dc3545', '#ffc107', '#0dcaf0', '#6f42c1'],
+                borderColor: 'rgba(255, 255, 255, 1)', borderWidth: 2
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: false }
-            }
+            responsive: true, maintainAspectRatio: false,
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const clickedIndex = elements[0].index;
+                    const categoriaNome = pieChart.data.labels[clickedIndex];
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const visao = urlParams.get('visao') || 'individual';
+                    const data_inicio = '{{ data_inicio|date:"Y-m-d" }}';
+                    const data_fim = '{{ data_fim|date:"Y-m-d" }}';
+
+                    const htmxUrl = `{% url 'analise_drilldown_categoria' %}?categoria_mae=${encodeURIComponent(categoriaNome)}&visao=${visao}&data_inicio=${data_inicio}&data_fim=${data_fim}`;
+
+                    const trigger = document.getElementById('htmx-drilldown-trigger');
+                    trigger.setAttribute('hx-get', htmxUrl);
+                    htmx.process(trigger); // Diz ao HTMX para reconhecer o novo atributo
+                    trigger.click();
+                }
+            },
+            onHover: (event, chartElement) => {
+                event.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default';
+            },
+            plugins: { legend: { position: 'top' }, title: { display: false } }
         }
     });
 
@@ -133,6 +140,9 @@
     const dataReceitasBar = {{ data_receitas_bar|safe }};
     const dataDespesasBar = {{ data_despesas_bar|safe }};
     const ctxBar = document.getElementById('fluxoCaixaChart');
+    
+    let chartStatusBar = Chart.getChart("fluxoCaixaChart");
+    if (chartStatusBar != undefined) { chartStatusBar.destroy(); }
 
     new Chart(ctxBar, {
         type: 'bar',
@@ -140,30 +150,21 @@
             labels: labelsBar,
             datasets: [
                 {
-                    label: 'Receitas',
-                    data: dataReceitasBar,
+                    label: 'Receitas', data: dataReceitasBar,
                     backgroundColor: 'rgba(75, 192, 192, 0.7)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
+                    borderColor: 'rgba(75, 192, 192, 1)', borderWidth: 1
                 },
                 {
-                    label: 'Despesas (Caixa)',
-                    data: dataDespesasBar,
+                    label: 'Despesas (Caixa)', data: dataDespesasBar,
                     backgroundColor: 'rgba(255, 99, 132, 0.7)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 1
+                    borderColor: 'rgba(255, 99, 132, 1)', borderWidth: 1
                 }
             ]
         },
         options: {
             responsive: true,
-            scales: {
-                y: { beginAtZero: true }
-            },
-            plugins: { 
-                legend: { position: 'top' },
-                title: { display: false }
-            }
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { position: 'top' } }
         }
     });
 </script>

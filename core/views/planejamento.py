@@ -5,10 +5,11 @@ from django.contrib import messages
 from django.db.models import Sum
 from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
+from django.db.models.functions import TruncMonth, TruncWeek, TruncDay # <<< IMPORTAÇÃO ADICIONADA
 
 from core.models import (
-    Despesa, MetaFinanceira, Categoria, Conta, Investimento, 
-    AporteInvestimento, CartaoDeCredito, Receita
+    Despesa, Receita, MetaFinanceira, Categoria, Conta, Investimento, 
+    AporteInvestimento, CartaoDeCredito
 )
 from core.forms import MetaFinanceiraForm, AporteForm
 
@@ -23,24 +24,22 @@ def analise_gastos(request):
     data_fim_str = request.GET.get('data_fim')
     periodo = request.GET.get('periodo', 'realizado')
     visao = request.GET.get('visao', 'individual')
+    agrupamento = request.GET.get('agrupamento', 'mensal')
 
     if data_inicio_str and data_fim_str:
         data_inicio = datetime.strptime(data_inicio_str, '%Y-%m-%d').date()
         data_fim = datetime.strptime(data_fim_str, '%Y-%m-%d').date()
     else:
-        # Padrão: Mês atual se for 'realizado', próximos 6 meses se for 'projetado'
-        data_inicio = hoje.replace(day=1)
-        if periodo == 'projetado':
-            data_fim = hoje + relativedelta(months=6)
-        else:
-            data_fim = hoje + relativedelta(months=1, day=1) - relativedelta(days=1)
+        data_inicio = hoje - relativedelta(months=5)
+        data_inicio = data_inicio.replace(day=1)
+        data_fim = hoje
 
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
     else:
         usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
 
-    # --- Cálculo para Gráfico de Pizza (sempre usa o filtro de data) ---
+    # --- Cálculo para Gráfico de Pizza ---
     gastos_por_categoria = Despesa.objects.filter(
         user__in=usuarios_a_filtrar, 
         data__range=[data_inicio, data_fim]
@@ -49,35 +48,47 @@ def analise_gastos(request):
     labels_pie = [gasto['categoria__nome'] for gasto in gastos_por_categoria]
     data_pie = [float(gasto['total']) for gasto in gastos_por_categoria]
 
-    # --- Lógica de Fluxo de Caixa (passado recente e projeção futura) ---
-    fluxo_caixa_data = []
-    # Mostra 6 meses passados e 6 meses futuros
-    for i in range(-6, 7): 
-        mes_alvo = hoje + relativedelta(months=i)
-        
-        filtro_data_mes = {'data__year': mes_alvo.year, 'data__month': mes_alvo.month}
-        # Se o período for 'realizado', só considera até hoje
-        if periodo == 'realizado' and mes_alvo.year == hoje.year and mes_alvo.month == hoje.month:
-            filtro_data_mes['data__lte'] = hoje
+    # --- Lógica de Fluxo de Caixa Agrupado ---
+    if agrupamento == 'semanal':
+        trunc_func = TruncWeek
+        date_format = "Sem %W/%Y"
+    elif agrupamento == 'diario':
+        trunc_func = TruncDay
+        date_format = "%d/%m/%Y"
+    else: # Padrão é mensal
+        trunc_func = TruncMonth
+        date_format = "%b/%y"
 
-        receitas_mes = Receita.objects.filter(user__in=usuarios_a_filtrar, **filtro_data_mes).aggregate(total=Sum('valor'))['total'] or 0
-        despesas_mes = Despesa.objects.filter(user__in=usuarios_a_filtrar, conta__isnull=False, **filtro_data_mes).aggregate(total=Sum('valor'))['total'] or 0
-        
-        fluxo_caixa_data.append({
-            'mes': mes_alvo.strftime('%b/%y'),
-            'receitas': float(receitas_mes),
-            'despesas': float(despesas_mes)
-        })
+    receitas = Receita.objects.filter(
+        user__in=usuarios_a_filtrar, data__range=[data_inicio, data_fim]
+    ).annotate(
+        periodo_agrupado=trunc_func('data')
+    ).values('periodo_agrupado').annotate(total=Sum('valor')).order_by('periodo_agrupado')
+
+    despesas = Despesa.objects.filter(
+        user__in=usuarios_a_filtrar, conta__isnull=False, data__range=[data_inicio, data_fim]
+    ).annotate(
+        periodo_agrupado=trunc_func('data')
+    ).values('periodo_agrupado').annotate(total=Sum('valor')).order_by('periodo_agrupado')
+
+    periodos = sorted(list(set([r['periodo_agrupado'] for r in receitas] + [d['periodo_agrupado'] for d in despesas])))
     
-    labels_bar = [item['mes'] for item in fluxo_caixa_data]
-    data_receitas_bar = [item['receitas'] for item in fluxo_caixa_data]
-    data_despesas_bar = [item['despesas'] for item in fluxo_caixa_data]
+    labels_bar = [p.strftime(date_format) for p in periodos]
+    data_receitas_bar = []
+    data_despesas_bar = []
+
+    for p in periodos:
+        receita_mes = next((item['total'] for item in receitas if item['periodo_agrupado'] == p), 0)
+        despesa_mes = next((item['total'] for item in despesas if item['periodo_agrupado'] == p), 0)
+        data_receitas_bar.append(float(receita_mes))
+        data_despesas_bar.append(float(despesa_mes))
 
     contexto = {
-        'gastos_por_categoria': gastos_por_categoria, 'labels_pie': labels_pie, 'data_pie': data_pie,
-        'visao': visao, 'periodo': periodo, 'data_inicio': data_inicio, 'data_fim': data_fim,
+        'gastos_por_categoria': gastos_por_categoria,
+        'labels_pie': labels_pie, 'data_pie': data_pie, 'visao': visao,
+        'periodo': periodo, 'data_inicio': data_inicio, 'data_fim': data_fim,
         'familia': familia, 'labels_bar': labels_bar, 'data_receitas_bar': data_receitas_bar,
-        'data_despesas_bar': data_despesas_bar,
+        'data_despesas_bar': data_despesas_bar, 'agrupamento': agrupamento,
     }
     return render(request, 'core/analise_gastos.html', contexto)
 
@@ -188,6 +199,46 @@ def orcamento_mensal(request):
         'familia': familia
     }
     return render(request, 'core/orcamento_mensal.html', contexto)
+
+@login_required
+def analise_drilldown_categoria(request):
+    familia = request.user.perfil.familia
+    
+    # Pega os parâmetros da requisição HTMX
+    categoria_mae_nome = request.GET.get('categoria_mae')
+    visao = request.GET.get('visao', 'individual')
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    
+    if visao == 'individual' or not familia:
+        usuarios_a_filtrar = [request.user]
+    else:
+        usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
+        
+    try:
+        # Encontra a categoria principal
+        categoria_mae = Categoria.objects.get(familia=familia, nome=categoria_mae_nome, categoria_mae__isnull=True)
+        # Pega as subcategorias dela
+        subcategorias = categoria_mae.subcategorias.all()
+
+        # Filtra as despesas que pertencem a essas subcategorias no período e visão
+        gastos = Despesa.objects.filter(
+            user__in=usuarios_a_filtrar,
+            data__range=[data_inicio, data_fim],
+            categoria__in=subcategorias
+        ).values('categoria__nome').annotate(total=Sum('valor')).order_by('-total')
+
+        labels = [g['categoria__nome'] for g in gastos]
+        data = [float(g['total']) for g in gastos]
+
+        contexto = {
+            'categoria_mae_nome': categoria_mae_nome,
+            'labels': labels,
+            'data': data
+        }
+        return render(request, 'core/partials/_analise_drilldown_chart.html', contexto)
+    except Categoria.DoesNotExist:
+        return HttpResponse("") # Retorna vazio se a categoria não for encontrada
 
 @login_required
 def evolucao_patrimonio(request):
