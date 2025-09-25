@@ -1,0 +1,55 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f8f9fa;
+}
+
+h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
+    font-family: 'Poppins', sans-serif;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* --- NOVOS ESTILOS PARA A LANDING PAGE --- */
+
+.hero-section {
+    background-color: #f8f9fa;
+}
+
+.feature-icon {
+    font-size: 3rem;
+    color: var(--bs-primary);
+}
+
+.testimonial-card {
+    border-left: 5px solid var(--bs-primary);
+}
+
+/* Estilo para a seção "Como Visto Em" */
+.social-proof-section {
+    background-color: #ffffff;
+    padding: 2rem 0;
+}
+
+.social-proof-section img {
+    height: 30px;
+    filter: grayscale(100%);
+    opacity: 0.6;
+    transition: all 0.3s ease-in-out;
+}
+
+.social-proof-section img:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+}
+
+/* Estilo para a seção de funcionalidades com imagem */
+.featurette-divider {
+    margin: 5rem 0; 
+}
+
+.featurette-image {
+    border-radius: 8px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}

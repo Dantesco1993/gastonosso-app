@@ -135,7 +135,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
+# ESTA LINHA É ESSENCIAL
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 # Se não estivermos em modo de DEBUG (produção), usa o WhiteNoise para armazenamento.
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

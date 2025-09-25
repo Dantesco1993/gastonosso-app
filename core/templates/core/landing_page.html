@@ -4,22 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Meu Dinheiro - Controle Financeiro Inteligente</title>
+  {% load static %}
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Poppins', sans-serif; }
-    .hero-section { background-color: #f8f9fa; }
-    .feature-icon {
-        font-size: 3rem;
-        color: var(--bs-primary);
-    }
-    .testimonial-card {
-        border-left: 5px solid var(--bs-primary);
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 </head>
 <body>
 
@@ -35,43 +26,47 @@
     </div>
   </nav>
 
-  <div class="hero-section">
+  <header class="hero-section">
     <div class="container col-xxl-8 px-4 py-5">
       <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
         <div class="col-10 col-sm-8 col-lg-6">
-          <img src="https://images.undraw.co/undraw_investing_re_bov7.svg" class="d-block mx-lg-auto img-fluid" alt="Planejamento Financeiro" width="700" height="500" loading="lazy">
+          <img src="{% static 'images/landing/hero-illustration.svg' %}" class="d-block mx-lg-auto img-fluid" alt="Planejamento Financeiro">
         </div>
         <div class="col-lg-6">
-          <h1 class="display-4 fw-bold text-body-emphasis lh-1 mb-3">Sua vida financeira, finalmente em ordem.</h1>
-          <p class="lead">Chega de planilhas complicadas e anotações perdidas. O **Meu Dinheiro** é a ferramenta intuitiva que centraliza suas contas, despesas, investimentos e metas, dando a você e sua família o poder de planejar o futuro com confiança.</p>
+          <h1 class="display-4 fw-bold text-body-emphasis lh-1 mb-3">O Fim das Planilhas. O Começo do Controle.</h1>
+          <p class="lead">Organize suas finanças, planeje em família e alcance suas metas com a ferramenta mais intuitiva que você já usou. Recupere a paz de espírito financeira.</p>
           <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
-            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 me-md-2">Comece a usar agora, é grátis!</a>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 me-md-2">Criar minha conta gratuita</a>
           </div>
         </div>
       </div>
     </div>
-  </div>
-
+  </header>
+  
   <main>
-    <div class="container px-4 py-5" id="benefits">
-      <h2 class="pb-2 border-bottom text-center">Uma plataforma completa para sua vida financeira</h2>
-      <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
-        <div class="feature col text-center">
-          <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3"><i class="bi bi-pie-chart-fill"></i></div>
-          <h3 class="fs-4">Entenda seus Gastos</h3>
-          <p>Com um dashboard visual, gráficos interativos e categorias personalizadas, você finalmente entenderá seus hábitos de consumo e identificará oportunidades para economizar.</p>
+
+    <div class="container px-4 py-5">
+      <hr class="featurette-divider">
+      <div class="row featurette align-items-center">
+        <div class="col-md-7">
+          <h2 class="featurette-heading fw-normal lh-1">Um dashboard que te dá clareza. <span class="text-muted">Tudo em um só lugar.</span></h2>
+          <p class="lead">Veja seu patrimônio, saldos, orçamentos e últimas transações em uma tela única e intuitiva. Alterne entre sua visão pessoal e a da família com um clique.</p>
         </div>
-        <div class="feature col text-center">
-          <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3"><i class="bi bi-people-fill"></i></div>
-          <h3 class="fs-4">Planeje em Família</h3>
-          <p>Convide seu cônjuge ou familiares para um orçamento compartilhado. Tenha uma visão consolidada das finanças da casa ou filtre para ver apenas suas transações.</p>
-        </div>
-        <div class="feature col text-center">
-          <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3"><i class="bi bi-graph-up-arrow"></i></div>
-          <h3 class="fs-4">Construa seu Futuro</h3>
-          <p>Defina metas, acompanhe o crescimento do seu patrimônio e projete o rendimento dos seus investimentos. Transforme seus sonhos em um plano de ação.</p>
+        <div class="col-md-5">
+          <img src="{% static 'images/landing/feature-dashboard.png' %}" class="featurette-image img-fluid mx-auto" alt="Dashboard da Aplicação">
         </div>
       </div>
+      <hr class="featurette-divider">
+      <div class="row featurette align-items-center">
+        <div class="col-md-7 order-md-2">
+          <h2 class="featurette-heading fw-normal lh-1">Planeje o futuro. <span class="text-muted">Não apenas registre o passado.</span></h2>
+          <p class="lead">Crie orçamentos mensais por categoria, defina metas financeiras com acompanhamento visual e projete o rendimento dos seus investimentos com nossa calculadora de juros compostos.</p>
+        </div>
+        <div class="col-md-5 order-md-1">
+          <img src="{% static 'images/landing/feature-planning.png' %}" class="featurette-image img-fluid mx-auto" alt="Página de Orçamento">
+        </div>
+      </div>
+      <hr class="featurette-divider">
     </div>
 
     <div class="bg-light">
@@ -106,13 +101,37 @@
         </div>
     </div>
     
+    <div class="container px-4 py-5">
+        <h2 class="text-center mb-5">Perguntas Frequentes</h2>
+        <div class="accordion" id="faqAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">É seguro colocar meus dados financeiros aqui?</button></h2>
+                <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body"><strong>Sim.</strong> Este é um projeto de portfólio e usa as melhores práticas de segurança do Django, mas recomendamos o uso de dados fictícios. A aplicação online é hospedada em servidores seguros e o banco de dados é protegido.</div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">Posso realmente usar com minha família?</button></h2>
+                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body"><strong>Com certeza!</strong> O sistema foi projetado para isso. Após criar sua conta e sua "Família", você recebe um código de convite. Basta compartilhá-lo para que outros membros se cadastrem e entrem no seu espaço compartilhado.</div>
+                </div>
+            </div>
+            <div class="accordion-item">
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">Preciso instalar alguma coisa?</button></h2>
+                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body"><strong>Não!</strong> A aplicação é 100% online. Você pode acessá-la de qualquer navegador, seja no computador, tablet ou celular.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container text-center py-5">
         <h2 class="display-6 fw-bold">Pronto para transformar sua vida financeira?</h2>
         <p class="lead my-4">Crie sua conta gratuita e comece a ter clareza e controle hoje mesmo.</p>
         <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">Começar Gratuitamente</a>
     </div>
   </main>
-
+  
   <footer class="text-muted py-5 bg-dark-subtle">
     <div class="container">
       <p class="float-end mb-1"><a href="#">Voltar ao topo</a></p>
