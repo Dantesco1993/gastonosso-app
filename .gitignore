@@ -15,6 +15,7 @@ env/
 staticfiles/
 media/
 *.log
+logs/
 
 # Migrations cache
 */migrations/**/__pycache__/
