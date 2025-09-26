@@ -1,10 +1,12 @@
 {% extends 'core/base.html' %}
+{% load static %}
 {% load humanize %}
 
-{% block title %}Planos e Assinatura{% endblock %}
+{% block title %}Planos e Assinaturas{% endblock %}
 
 {% block content %}
 <div class="text-center mb-5">
+    <img src="{% static 'img/favicon.png' %}" alt="Logo Gastonosso" width="64" height="64" class="mb-3">
     <h1>Nossos Planos</h1>
     <p class="lead text-muted">Escolha o plano que melhor se adapta à sua jornada financeira.</p>
 </div>
@@ -12,14 +14,19 @@
 <div class="row row-cols-1 row-cols-md-2 mb-3 text-center justify-content-center">
     {% for plano in planos %}
     <div class="col">
-        <div class="card mb-4 rounded-3 shadow-sm {% if plano == assinatura_atual.plano %}border-primary{% endif %}">
-            <div class="card-header py-3 {% if plano == assinatura_atual.plano %}text-bg-primary border-primary{% endif %}">
+        <div class="card mb-4 rounded-3 shadow-sm {% if assinatura_atual and plano.id == assinatura_atual.plano_id %}border-primary{% endif %}">
+            <div class="card-header py-3 {% if assinatura_atual and plano.id == assinatura_atual.plano_id %}text-bg-primary border-primary{% endif %}">
                 <h4 class="my-0 fw-normal">{{ plano.nome }}</h4>
             </div>
+
             <div class="card-body">
-                <h1 class="card-title pricing-card-title">R$ {{ plano.preco_mensal|floatformat:2|intcomma }}<small class="text-muted fw-light">/mês</small></h1>
+                <h1 class="card-title pricing-card-title">
+                    R$ {{ plano.preco_mensal|floatformat:2|intcomma }}
+                    <small class="text-muted fw-light">/mês</small>
+                </h1>
+
                 <ul class="list-unstyled mt-3 mb-4">
-                    {% if plano.is_free %}
+                    {% if plano.preco_mensal == 0 %}
                         <li>Controle individual completo</li>
                         <li>Análises e gráficos pessoais</li>
                         <li>Cadastro ilimitado de transações</li>
@@ -32,15 +39,31 @@
                     {% endif %}
                 </ul>
 
-                {% if plano == assinatura_atual.plano %}
-                    <button type="button" class="w-100 btn btn-lg btn-outline-primary" disabled>Seu Plano Atual</button>
+                {% if assinatura_atual and plano.id == assinatura_atual.plano_id %}
+                    <button type="button" class="w-100 btn btn-lg btn-outline-primary" disabled>
+                        Seu Plano Atual
+                    </button>
                 {% else %}
-                    {% if plano.is_free %}
-                        {% else %}
-                        <a href="/planos/criar-checkout-session/2/" class="w-100 btn btn-lg btn-primary">Fazer Upgrade</a>
+                    {% if plano.preco_mensal > 0 %}
+                        <form method="post" action="{% url 'criar_sessao' plano.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="w-100 btn btn-lg btn-primary">
+                                Fazer Upgrade
+                            </button>
+                        </form>
+                    {% else %}
+                        <button type="button" class="w-100 btn btn-lg btn-outline-secondary" disabled>
+                            Plano Gratuito
+                        </button>
                     {% endif %}
                 {% endif %}
             </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-warning" role="alert">
+            Nenhum plano disponível no momento.
         </div>
     </div>
     {% endfor %}

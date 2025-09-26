@@ -1,10 +1,39 @@
+# Python
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
 *.pyc
-*.sqlite3
-db.sqlite3
-.venv
+*.so
+
+# Virtual env
+.venv/
 venv/
 env/
+
+# Django
+staticfiles/
+media/
+*.log
+
+# Migrations cache
+*/migrations/**/__pycache__/
+*/migrations/*.pyc
+
+# VSCode / IDE
 .vscode/
 .idea/
+
+# Env files
 .env
+*.env
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
+db.sqlite3

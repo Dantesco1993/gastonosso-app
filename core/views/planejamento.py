@@ -11,6 +11,7 @@ from itertools import chain
 from operator import attrgetter
 from django.core.paginator import Paginator
 from decimal import Decimal # <<< IMPORTAÇÃO ADICIONADA
+from django.shortcuts import redirect
 
 from core.models import (
     Despesa, Receita, MetaFinanceira, Categoria, Conta, Investimento, 
