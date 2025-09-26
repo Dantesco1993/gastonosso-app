@@ -6,3 +6,4 @@ from .cartoes import *
 from .planejamento import * # Verifique se esta linha está presente
 from .investimentos import *
 from .configuracoes import *
+from .pagamentos import * # Adicione esta linha
