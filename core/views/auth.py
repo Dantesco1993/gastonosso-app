@@ -10,6 +10,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
+
 from core.forms import CustomUserCreationForm, EntrarFamiliaForm, ContaForm
 from core.models import (
     Perfil,
@@ -97,11 +98,13 @@ def register(request):
     return render(request, "registration/register.html", {"form": form})
 
 
-def landing_page(request):
-    if request.user.is_authenticated:
-        return redirect("dashboard")
-    return render(request, "core/landing_page.html")
+@login_required
+def dashboard(request):
+    return render(request, 'core/dashboard.html')  # exemplo
 
+def landing_page(request):
+    # Não redireciona usuários logados aqui; apenas mostra a landing
+    return render(request, 'core/landing_page.html')
 
 @login_required
 def primeiros_passos(request):

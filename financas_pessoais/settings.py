@@ -77,6 +77,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'core.views.middleware.ForceAuthMiddleware',   # se você realmente precisar dele
 ]
 
 # Importante: agora apontando para financas_pessoais
@@ -141,9 +142,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "dashboard"   # ajuste conforme suas URLs nomeadas
-LOGOUT_REDIRECT_URL = "login"
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGOUT_REDIRECT_URL = 'landing'
 
 # -----------------------------------------------------------------------------
 # Segurança (produção) — use DEBUG=true em dev para evitar HTTPS

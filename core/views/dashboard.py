@@ -1,76 +1,148 @@
-from django.shortcuts import render, redirect
+from decimal import Decimal
+from datetime import date
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Sum
-from datetime import date
+from django.shortcuts import render
 from dateutil.relativedelta import relativedelta
-from itertools import chain
-from operator import attrgetter
-from django.contrib import messages
-from django.urls import reverse
 
-from core.models import Conta, Receita, Despesa, CartaoDeCredito, MetaFinanceira, Investimento
+from core.models import (
+    Perfil, Conta, Receita, Despesa, CartaoDeCredito,
+    MetaFinanceira, Investimento
+)
 
 @login_required
 def dashboard(request):
     user = request.user
-    familia = user.perfil.familia
+    # garante Perfil (evita DoesNotExist)
+    perfil, _ = Perfil.objects.get_or_create(user=user)
+    familia = getattr(perfil, "familia", None)
     hoje = date.today()
-    
-    # --- Filtros ---
-    visao = request.GET.get('visao', 'individual')
-    periodo = request.GET.get('periodo', 'realizado')
 
-    if visao == 'conjunto' and (not familia or not familia.has_premium()):
-        visao = 'individual'
+    # ---- filtros da UI ----
+    visao = request.GET.get("visao", "individual")          # 'individual' | 'conjunto'
+    periodo = request.GET.get("periodo", "realizado")       # 'realizado' | 'projetado'
 
-    if visao == 'individual' or not familia:
-        usuarios_a_filtrar = [user]
+    # checa premium
+    has_premium = (familia and callable(getattr(familia, "has_premium", None)) and familia.has_premium()) or False
+    if visao == "conjunto" and (not familia or not has_premium):
+        visao = "individual"
+
+    # define conjunto de usuários
+    if visao == "individual" or not familia:
+        usuarios_qs = User.objects.filter(pk=user.pk)
     else:
-        usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
-        
-    # --- CORREÇÃO: Usando .none() para evitar o erro com listas vazias ---
+        usuarios_qs = User.objects.filter(perfil__familia=familia)
+
+    # ---- querysets base (nunca None) ----
     if familia:
-        contas = Conta.objects.filter(familia=familia)
+        contas = Conta.objects.filter(familia=familia).order_by("nome")
         cartoes = CartaoDeCredito.objects.filter(familia=familia)
         investimentos = Investimento.objects.filter(familia=familia)
-        metas = MetaFinanceira.objects.filter(familia=familia).order_by('-valor_atual')[:3]
+        metas = MetaFinanceira.objects.filter(familia=familia).order_by("-valor_atual")[:3]
     else:
         contas = Conta.objects.none()
         cartoes = CartaoDeCredito.objects.none()
         investimentos = Investimento.objects.none()
         metas = MetaFinanceira.objects.none()
-    
-    data_limite = (hoje + relativedelta(months=6)) if periodo == 'projetado' else hoje
 
-    # --- Cálculos para os Cards ---
-    saldo_total_contas = sum(c.get_saldo_atual(usuarios=usuarios_a_filtrar, data_base=data_limite) for c in contas)
-    
-    receitas_mes = Receita.objects.filter(user__in=usuarios_a_filtrar, data__year=hoje.year, data__month=hoje.month, data__lte=hoje).aggregate(Sum('valor'))['valor__sum'] or 0
-    despesas_caixa_mes = Despesa.objects.filter(user__in=usuarios_a_filtrar, conta__isnull=False, data__year=hoje.year, data__month=hoje.month, data__lte=hoje).aggregate(Sum('valor'))['valor__sum'] or 0
-    despesas_cartao_mes = Despesa.objects.filter(user__in=usuarios_a_filtrar, cartao__isnull=False, data__year=hoje.year, data__month=hoje.month, data__lte=hoje).aggregate(Sum('valor'))['valor__sum'] or 0
+    data_limite = (hoje + relativedelta(months=6)) if periodo == "projetado" else hoje
+
+    # ---- saldos por conta ----
+    saldos_por_conta = {
+        c.id: c.get_saldo_atual(usuarios=usuarios_qs, data_base=data_limite)
+        for c in contas
+    }
+    saldo_total_contas = sum(saldos_por_conta.values(), Decimal("0"))
+
+    # ---- totais do mês ----
+    receitas_mes = (
+        Receita.objects.filter(
+            user__in=usuarios_qs,
+            data__year=hoje.year, data__month=hoje.month, data__lte=hoje
+        ).aggregate(total=Sum("valor"))["total"] or Decimal("0")
+    )
+    despesas_caixa_mes = (
+        Despesa.objects.filter(
+            user__in=usuarios_qs, conta__isnull=False,
+            data__year=hoje.year, data__month=hoje.month, data__lte=hoje
+        ).aggregate(total=Sum("valor"))["total"] or Decimal("0")
+    )
+    despesas_cartao_mes = (
+        Despesa.objects.filter(
+            user__in=usuarios_qs, cartao__isnull=False,
+            data__year=hoje.year, data__month=hoje.month, data__lte=hoje
+        ).aggregate(total=Sum("valor"))["total"] or Decimal("0")
+    )
     gastos_totais_mes = despesas_caixa_mes + despesas_cartao_mes
     balanco_caixa_mes = receitas_mes - despesas_caixa_mes
 
-    faturas_abertas = [{'cartao': c, 'total': c.get_fatura_aberta(usuarios=usuarios_a_filtrar)['total']} for c in cartoes]
+    # ---- faturas abertas ----
+    faturas_abertas = []
+    for c in cartoes:
+        info = c.get_fatura_aberta(usuarios=usuarios_qs)
+        total = (info or {}).get("total", Decimal("0"))
+        faturas_abertas.append({"cartao": c, "total": total})
 
-    valor_investido = investimentos.aggregate(total=Sum('valor_atual'))['total'] or 0
-    divida_cartoes = sum(f['total'] for f in faturas_abertas)
-    saldo_contas_realizado = sum(c.get_saldo_atual(usuarios=usuarios_a_filtrar) for c in contas)
+    # ---- patrimônio ----
+    valor_investido = investimentos.aggregate(total=Sum("valor_atual"))["total"] or Decimal("0")
+    divida_cartoes = sum((f["total"] for f in faturas_abertas), Decimal("0"))
+    saldo_contas_realizado = sum(
+        (c.get_saldo_atual(usuarios=usuarios_qs) for c in contas),
+        Decimal("0"),
+    )
     patrimonio_liquido = (saldo_contas_realizado + valor_investido) - divida_cartoes
 
-    gastos_mes_categoria = Despesa.objects.filter(user__in=usuarios_a_filtrar, data__year=hoje.year, data__month=hoje.month).values('categoria__nome').annotate(total=Sum('valor')).order_by('-total')[:5]
-    labels_gastos_pie = [g['categoria__nome'] for g in gastos_mes_categoria]
-    data_gastos_pie = [float(g['total']) for g in gastos_mes_categoria]
+    # ---- gráfico pizza: top categorias do mês ----
+    gastos_mes_categoria = (
+        Despesa.objects.filter(
+            user__in=usuarios_qs, data__year=hoje.year, data__month=hoje.month
+        )
+        .values("categoria__nome")
+        .annotate(total=Sum("valor"))
+        .order_by("-total")[:5]
+    )
+    # construímos uma lista de pares para evitar filtro 'index' no template
+    gastos_pie = [
+        {
+            "label": (g["categoria__nome"] or "Sem categoria"),
+            "value": float(g["total"]),
+        }
+        for g in gastos_mes_categoria
+    ]
 
     contexto = {
-        'saldo_total_contas': saldo_total_contas, 'balanco_caixa_mes': balanco_caixa_mes,
-        'receitas_mes': receitas_mes, 'despesas_caixa_mes': despesas_caixa_mes,
-        'despesas_cartao_mes': despesas_cartao_mes, 'gastos_totais_mes': gastos_totais_mes,
-        'faturas': faturas_abertas, 'patrimonio_liquido': patrimonio_liquido,
-        'labels_gastos_pie': labels_gastos_pie, 'data_gastos_pie': data_gastos_pie,
-        'metas': metas, 'visao': visao, 'periodo': periodo, 'familia': familia,
-        'data_projecao': data_limite,
-        'has_premium_access': familia.has_premium() if familia else False
+        # coleções
+        "contas": contas,
+        "cartoes": cartoes,
+        "investimentos": investimentos,
+        "metas": metas,
+
+        # saldos e totais
+        "saldos_por_conta": saldos_por_conta,
+        "saldo_total_contas": saldo_total_contas,
+        "balanco_caixa_mes": balanco_caixa_mes,
+        "receitas_mes": receitas_mes,
+        "despesas_caixa_mes": despesas_caixa_mes,
+        "despesas_cartao_mes": despesas_cartao_mes,
+        "gastos_totais_mes": gastos_totais_mes,
+        "faturas": faturas_abertas,
+        "patrimonio_liquido": patrimonio_liquido,
+
+        # gráfico (sem filtros custom no template)
+        "gastos_pie": gastos_pie,
+
+        # UI
+        "visao": visao,
+        "periodo": periodo,
+        "familia": familia,
+        "data_projecao": data_limite,
+        "has_premium_access": has_premium,
+
+        # toggles
+        "show_family_toggle": bool(familia),
+        "family_toggle_enabled": bool(familia and has_premium),
+        "current_params": request.GET.urlencode(),
     }
-    return render(request, 'core/dashboard.html', contexto)
+    return render(request, "core/dashboard.html", contexto)
