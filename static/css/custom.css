@@ -1,68 +1,214 @@
-/* ---- Estilos Globais ---- */
-body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f8f9fa; /* Um cinza bem claro para o fundo da página */
+/* =========================================================
+   GastoNosso — custom.css (landing + header)
+   ========================================================= */
+
+/* ===== BASE / PALETA ===== */
+:root{
+  --gn-bg: #fffaf2;                 /* fundo off-white */
+  --gn-text:#0f3f35;                /* verde escuro principal */
+  --gn-muted:#2b5b4f;               /* textos secundários */
+  --gn-brand:#3aa376;               /* cor de ação / CTA */
+  --gn-brand-strong:#2e8c63;        /* hover / ênfase */
+  --gn-card:#eef6f2;                /* blocos claros */
+  --gn-border:#cfe4db;              /* borda suave */
+  --gn-radius:16px;
+  --gn-shadow:0 10px 28px rgba(16,63,53,.12);
 }
 
-/* Aplica uma fonte mais estilizada para títulos, botões e o nome do site */
-h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
-    font-family: 'Poppins', sans-serif;
+*{ box-sizing:border-box; }
+.gn-body{
+  background:var(--gn-bg);
+  color:var(--gn-text);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+a{ text-decoration:none; }
+
+/* ===== BOTÕES GERAIS ===== */
+.gn-btn{
+  background:var(--gn-brand);
+  border-color:var(--gn-brand);
+  color:#fff;
+}
+.gn-btn:hover{
+  background:var(--gn-brand-strong);
+  border-color:var(--gn-brand-strong);
+  color:#fff;
+}
+.gn-btn-outline{
+  border-color:var(--gn-brand-strong);
+  color:var(--gn-brand-strong);
+  background:#fff;
+}
+.gn-btn-outline:hover{
+  background:var(--gn-brand-strong);
+  color:#fff;
+}
+.gn-link{ color:var(--gn-brand-strong); font-weight:700; }
+.gn-link:hover{ color:#1f6b50; }
+
+/* ===== NAVBAR / HEADER (aprimorado) ===== */
+.gn-nav{
+  background:#fff;
+  border-bottom:1px solid #e8efe9;
+  box-shadow:0 2px 14px rgba(0,0,0,.04);
+  padding-block:10px;
+}
+.gn-brand{ color:#0f3f35; text-decoration:none; }
+.gn-wordmark{ font-weight:800; font-size:22px; letter-spacing:-.2px; }
+.gn-logo{ display:block; width:40px; height:40px; }
+
+/* Fallback do logo (mostra “GN” se a imagem falhar) */
+.gn-logo-fallback{
+  width:40px; height:40px; display:grid; place-items:center;
+  border-radius:10px; background:#e7f4ed; color:#2e8c63;
+  font-weight:800; font-size:16px;
 }
 
-/* Adiciona um pouco mais de "respiro" (espaçamento interno) aos cards */
-.card-body {
-    padding: 1.5rem;
+.gn-menu .nav-link{
+  padding:10px 14px; border-radius:10px;
+  color:#2b5b4f; font-weight:700;
+}
+.gn-menu .nav-link:hover{ color:#0f3f35; background:#edf6f1; }
+.gn-menu .nav-link.active{ color:#0f3f35; background:#dff1e9; }
+
+/* Botões do topo (mais chamativos) */
+.gn-btn-outline{
+  --c:#2e8c63;
+  font-weight:800; border:2px solid var(--c); color:var(--c);
+  background:#fff; border-radius:12px; padding:.55rem 1rem;
+}
+.gn-btn-outline:hover{ background:#e7f4ed; color:#206b4e; border-color:#206b4e; }
+.gn-btn-cta{
+  background:#3aa376; border:2px solid #3aa376; color:#fff;
+  font-weight:800; border-radius:12px; padding:.55rem 1rem;
+  box-shadow:0 6px 18px rgba(58,163,118,.28);
+}
+.gn-btn-cta:hover{ background:#2e8c63; border-color:#2e8c63; color:#fff; }
+
+/* Toggler visível em fundo claro */
+.gn-toggler{ border:0; }
+.gn-toggler .navbar-toggler-icon{
+  background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(43,91,79,1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
 }
 
-/* --- Estilos Específicos da Landing Page --- */
-
-.hero-section {
-    /* Um gradiente suave de um cinza claro para um quase branco */
-    background: linear-gradient(135deg, #f0f2f5 0%, #ffffff 100%);
+/* ===== HERO (vitrina) ===== */
+.gn-hero{
+  padding: clamp(32px,6vw,84px) 0;
+  background: radial-gradient(1200px 480px at 80% -10%, #e8f4ee, transparent 70%), #fff;
+}
+.gn-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  background:#e7f4ed; color:var(--gn-brand-strong);
+  padding:6px 10px; border-radius:999px; font-weight:700; font-size:13px;
+}
+.gn-title{
+  font-size: clamp(34px,5.5vw,64px);
+  line-height:1.05; font-weight:800; letter-spacing:-.5px;
+}
+.gn-subtitle{ color:var(--gn-muted); font-size: clamp(16px,1.8vw,19px); }
+.gn-grad{
+  background:linear-gradient(90deg, var(--gn-brand-strong), #51c08f);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
 }
 
-.feature-icon {
-    font-size: 3rem;
-    color: var(--bs-primary);
+/* Animação de destaque no CTA */
+@keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
+.pulse{ animation:pulse 2.6s ease-in-out infinite; }
+
+/* ===== ILUSTRAÇÃO CSS (laptop + celular) ===== */
+.gn-art{
+  background:#f0f6f3; border:1px solid var(--gn-border);
+  border-radius:var(--gn-radius);
+}
+.gn-device{
+  position:relative; width:100%; aspect-ratio:16/11;
+  border-radius:14px; background:linear-gradient(180deg,#edf5f1,#e6f1ec);
+  border:2px solid var(--gn-border); overflow:hidden;
+}
+.gn-laptop{
+  position:absolute; left:6%; right:6%; bottom:6%; height:68%;
+  background:#153f34; border-radius:10px; box-shadow:inset 0 0 0 10px #0f3f35;
+}
+.gn-screen{
+  position:absolute; left:6%; right:6%; top:6%; bottom:22%;
+  background:#eaf4ef; border-radius:8px; overflow:hidden; padding:14px;
+}
+.gn-screen-row{ display:flex; gap:16px; height:100%; }
+.gn-pie{
+  width:42%; min-width:120px; display:grid; place-items:center;
+}
+.gn-pie::before{
+  content:""; width:140px; height:140px; border-radius:50%;
+  background:
+    conic-gradient(var(--gn-brand-strong) 0 68%, transparent 0 100%),
+    radial-gradient(circle at 50% 50%, #eaf4ef 59%, transparent 60%);
+  border:10px solid var(--gn-border);
+  box-shadow:0 2px 0 var(--gn-border) inset;
+}
+.gn-bars{
+  flex:1; display:flex; align-items:flex-end; gap:12px; padding:6px 0;
+}
+.gn-bars span{
+  flex:1; background:var(--gn-brand); border-radius:8px 8px 0 0;
+  box-shadow:0 2px 0 var(--gn-brand-strong) inset;
+}
+.gn-bars span:nth-child(1){ height:32%; }
+.gn-bars span:nth-child(2){ height:52%; }
+.gn-bars span:nth-child(3){ height:72%; }
+.gn-bars span:nth-child(4){ height:92%; }
+
+/* Celular sobreposto */
+.gn-phone{
+  position:absolute; left:-6%; bottom:-4%;
+  width:min(164px,28%); aspect-ratio:9/18; border-radius:20px;
+  background:#0f3f35; box-shadow:0 12px 36px rgba(0,0,0,.25);
+  border:6px solid #0b2f27; overflow:hidden;
+}
+.gn-phone-screen{
+  position:absolute; inset:10px; background:#fff; border-radius:12px; padding:12px;
+}
+.gn-pill{ height:18px; background:#e7f2ec; border-radius:10px; margin-bottom:10px; }
+.gn-mini-bars{ display:flex; gap:8px; align-items:flex-end; height:72px; }
+.gn-mini-bars span{ flex:1; background:var(--gn-brand); border-radius:6px; }
+
+/* Flutuação sutil do bloco gráfico */
+@keyframes float-up { 0%{transform:translateY(6px)} 50%{transform:translateY(-6px)} 100%{transform:translateY(6px)} }
+.float-up{ animation: float-up 6s ease-in-out infinite; }
+
+/* ===== SEÇÕES / CARDS ===== */
+.gn-section{ background:#ffffff; }
+.gn-card{
+  background:#fff; border:1px solid var(--gn-border);
+  border-radius:var(--gn-radius); padding:18px; box-shadow:var(--gn-shadow);
+}
+.gn-step{
+  background:var(--gn-card); border:1px solid var(--gn-border);
+  border-radius:var(--gn-radius); padding:22px;
+}
+.gn-step .icon{
+  width:48px; height:48px; border-radius:12px; background:#dff1e9;
+  color:var(--gn-brand-strong); display:grid; place-items:center;
+  font-size:22px; margin-bottom:8px;
 }
 
-.testimonial-card {
-    border-left: 5px solid var(--bs-primary);
+/* Depoimentos */
+.gn-testimonial{
+  background:#fff; border:1px solid var(--gn-border);
+  border-radius:var(--gn-radius); padding:20px; box-shadow:var(--gn-shadow);
+}
+.gn-testimonial .who{ color:var(--gn-muted); font-weight:600; }
+
+/* Badges de confiança */
+.gn-trust{
+  display:inline-block; background:#eaf4ef; color:var(--gn-muted);
+  padding:6px 10px; border-radius:999px;
 }
 
-.social-proof-section {
-    background-color: #ffffff;
-    padding: 2rem 0;
-}
+/* CTA final */
+.gn-cta{ background:linear-gradient(90deg, #e9f5f0, #f6fbf9); }
 
-.social-proof-section img {
-    height: 30px;
-    filter: grayscale(100%);
-    opacity: 0.6;
-    transition: all 0.3s ease-in-out;
-}
-
-.social-proof-section img:hover {
-    filter: grayscale(0%);
-    opacity: 1;
-}
-
-.featurette-divider {
-    margin: 5rem 0; 
-}
-
-.featurette-image {
-    border-radius: 8px;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-}
-
-/* --- Animação de Flutuação --- */
-@keyframes float-animation {
-    0% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0); }
-}
-
-.hero-image-animated {
-    animation: float-animation 6s ease-in-out infinite;
+/* ===== RESPONSIVO ===== */
+@media (max-width: 991.98px){
+  .gn-menu .nav-link{ padding:12px; margin:2px 0; }
+  .gn-nav{ padding-block:8px; }
 }

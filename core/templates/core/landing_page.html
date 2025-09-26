@@ -3,137 +3,253 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GastoNosso - O Orçamento Familiar, Simplificado.</title>
+  <title>GastoNosso — Divida e organize as finanças da família sem estresse</title>
+
   {% load static %}
   <link rel="icon" type="image/png" href="{% static 'brand/favicon.png' %}">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="GastoNosso — Orçamento familiar simples e visual">
+  <meta property="og:description" content="Cadastre gastos, faça rateio entre familiares e tenha clareza do orçamento em minutos. Experimente gratuitamente.">
+  <meta property="og:image" content="{% static 'images/landing/og-gn.png' %}">
+  <meta name="theme-color" content="#2e8c63">
+
+  <!-- Bootstrap + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Custom -->
   <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 </head>
-<body>
+<body class="gn-body">
 
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
-    <div class="container-fluid">
-      <a class="navbar-brand fw-bold" href="#">
-        <i class="bi bi-people"></i> GastoNosso
-      </a>
-      <div class="d-flex">
-        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Entrar</a>
-        <a href="{% url 'register' %}" class="btn btn-primary">Começar a Usar</a>
+  <!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg gn-nav sticky-top">
+  <div class="container">
+    <a class="navbar-brand gn-brand d-flex align-items-center" href="#">
+      <!-- LOGO: troque o src se preferir. onerror esconde a img e mostra o fallback -->
+      <img src="{% static 'brand/logo-mark.svg' %}" alt="Gasto Nosso" width="40" height="40"
+           class="gn-logo me-2" onerror="this.style.display='none';document.getElementById('gn-fallback').style.display='grid'">
+      <span id="gn-fallback" class="gn-logo-fallback me-2" style="display:none;">GN</span>
+      <span class="gn-wordmark">Gasto <strong>Nosso</strong></span>
+    </a>
+
+    <button class="navbar-toggler gn-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"
+            aria-controls="navMain" aria-expanded="false" aria-label="Abrir menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navMain" class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto me-3 align-items-lg-center gn-menu">
+        <li class="nav-item"><a class="nav-link" href="#como-funciona">Como funciona</a></li>
+        <li class="nav-item"><a class="nav-link" href="#recursos">Recursos</a></li>
+        <li class="nav-item"><a class="nav-link" href="#depoimentos">Depoimentos</a></li>
+        <li class="nav-item"><a class="nav-link" href="#faqAccordion">Dúvidas</a></li>
+      </ul>
+      <div class="d-flex gap-2">
+        <a href="{% url 'login' %}" class="btn gn-btn-outline">Entrar</a>
+        <a href="{% url 'register' %}" class="btn gn-btn-cta">Começar grátis</a>
       </div>
     </div>
-  </nav>
+  </div>
+</nav>
 
-  <header class="hero-section">
-    <div class="container px-4 py-5 text-center">
-      <h1 class="display-5 fw-bold text-body-emphasis mb-4">O orçamento familiar, sem estresse.</h1>
-      <div class="row align-items-center g-lg-5 py-5">
-        <div class="col-lg-7 text-center text-lg-start">
-          <p class="lead">Com o **GastoNosso**, casais e famílias finalmente têm um lugar central para planejar, registrar e analisar as finanças em conjunto. Transparência e colaboração, sem planilhas complicadas.</p>
-          <div class="d-grid gap-2 d-md-flex justify-content-md-center justify-content-lg-start">
-            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 me-md-2">Organize seu GastoNosso</a>
+  <!-- HERO -->
+  <header class="gn-hero">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6">
+          <div class="gn-badge mb-3">
+            <i class="bi bi-star-fill me-1"></i> 4,9/5 por famílias que planejam juntas
+          </div>
+          <h1 class="gn-title mb-3">
+            Orçamento familiar <span class="gn-grad">sem briga e sem planilha</span>
+          </h1>
+          <p class="gn-subtitle mb-4">
+            Cadastre despesas, <strong>rateie</strong> com um toque, acompanhe gráficos claros e
+            tome decisões em conjunto. Segurança, simplicidade e transparência.
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'register' %}" class="btn btn-success btn-lg gn-btn">Criar minha família</a>
+            <a href="{% url 'login' %}" class="btn btn-link gn-link">Ver uma demo</a>
+          </div>
+          <div class="d-flex align-items-center gap-3 mt-4 small text-success">
+            <i class="bi bi-shield-lock"></i> Dados protegidos •
+            <i class="bi bi-credit-card"></i> Checkout seguro com Stripe
           </div>
         </div>
-        <div class="col-md-10 mx-auto col-lg-5">
-            <img src="{% static 'images/landing/hero-illustration.svg' %}" class="img-fluid hero-image-animated" alt="Orçamento Familiar" loading="lazy">
+
+        <div class="col-lg-6">
+          <!-- use a imagem que geramos OU o bloco animado abaixo -->
+          <!-- <img src="{% static 'images/landing/hero-gn.png' %}" class="img-fluid rounded-4 shadow-lg" alt="GastoNosso"> -->
+
+          <div class="gn-art p-3 p-md-4 shadow-lg">
+            <div class="gn-device float-up">
+              <div class="gn-screen">
+                <div class="gn-screen-row">
+                  <div class="gn-pie"></div>
+                  <div class="gn-bars">
+                    <span></span><span></span><span></span><span></span>
+                  </div>
+                </div>
+              </div>
+              <div class="gn-laptop"></div>
+              <div class="gn-phone">
+                <div class="gn-phone-screen">
+                  <div class="gn-pill"></div>
+                  <div class="gn-pill" style="width:62%"></div>
+                  <div class="gn-mini-bars">
+                    <span style="height:32%"></span>
+                    <span style="height:58%"></span>
+                    <span style="height:84%"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
+      </div>
+
+      <!-- badges de confiança -->
+      <div class="row g-3 mt-4 align-items-center justify-content-center text-center opacity-75">
+        <div class="col-6 col-md-auto"><span class="gn-trust">Sem anúncio • Sem spam</span></div>
+        <div class="col-6 col-md-auto"><span class="gn-trust">Hospedagem segura</span></div>
+        <div class="col-6 col-md-auto"><span class="gn-trust">Suporte humano</span></div>
       </div>
     </div>
   </header>
-  
-  <main>
-    <div class="container px-4 py-5" id="benefits">
-      <h2 class="pb-2 border-bottom text-center">Controle compartilhado, decisões alinhadas.</h2>
-      <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
-        <div class="feature col text-center">
-          <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3"><i class="bi bi-person-hearts"></i></div>
-          <h3 class="fs-4">Visão Individual e Conjunta</h3>
-          <p>Veja apenas seus gastos ou o panorama completo da família com um único clique. Total privacidade e total transparência, quando você precisar.</p>
+
+  <!-- COMO FUNCIONA -->
+  <section class="container py-5" id="como-funciona">
+    <h2 class="text-center fw-bold mb-4">Como funciona</h2>
+    <div class="row g-4 row-cols-1 row-cols-md-3">
+      <div class="col">
+        <div class="gn-step h-100">
+          <div class="icon"><i class="bi bi-people"></i></div>
+          <h3>1) Crie sua família</h3>
+          <p>Cadastre sua conta, crie a “Família” e convide quem compartilha despesas com você.</p>
         </div>
-        <div class="feature col text-center">
-          <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3"><i class="bi bi-check2-circle"></i></div>
-          <h3 class="fs-4">Orçamento Único e Simples</h3>
-          <p>Definam limites de gastos por categoria para a família inteira e acompanhem o progresso juntos. Saibam exatamente para onde o dinheiro está indo, a qualquer momento.</p>
+      </div>
+      <div class="col">
+        <div class="gn-step h-100">
+          <div class="icon"><i class="bi bi-receipt"></i></div>
+          <h3>2) Lance e rateie</h3>
+          <p>Registre gastos e defina o rateio por pessoa <em>em um toque</em> — rápido e justo.</p>
         </div>
-        <div class="feature col text-center">
-          <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3"><i class="bi bi-bullseye"></i></div>
-          <h3 class="fs-4">Metas em Comum</h3>
-          <p>Planejem aquela viagem ou a entrada da casa nova como um time. Criem metas financeiras compartilhadas e vejam o progresso de cada aporte em tempo real.</p>
+      </div>
+      <div class="col">
+        <div class="gn-step h-100">
+          <div class="icon"><i class="bi bi-graph-up-arrow"></i></div>
+          <h3>3) Visualize e decida</h3>
+          <p>Gráficos e alertas mostram o orçamento em tempo real para decisões sem atrito.</p>
         </div>
       </div>
     </div>
-    
-    <div class="bg-light">
-        <div class="container px-4 py-5">
-            <h2 class="text-center mb-5">Quem já está planejando junto com o GastoNosso?</h2>
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 border-0 shadow-sm testimonial-card">
-                        <div class="card-body">
-                            <p class="card-text">"Finalmente uma ferramenta que meu marido e eu conseguimos usar juntos! O GastoNosso acabou com as discussões sobre o orçamento."</p>
-                            <footer class="blockquote-footer mt-2">Ana P., Designer</footer>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 border-0 shadow-sm testimonial-card">
-                        <div class="card-body">
-                            <p class="card-text">"Ver o crescimento do nosso patrimônio como família é incrivelmente motivador. É mais que um app, é um parceiro na construção dos nossos sonhos."</p>
-                            <footer class="blockquote-footer mt-2">Marcos L., Desenvolvedor</footer>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 border-0 shadow-sm testimonial-card">
-                        <div class="card-body">
-                            <p class="card-text">"Simples, direto e sem a complexidade dos grandes bancos. Cadastrar um gasto recorrente da casa leva 10 segundos. Recomendo!"</p>
-                            <footer class="blockquote-footer mt-2">Julia S., Autônoma</footer>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="container px-4 py-5">
-        <h2 class="text-center mb-5">Dúvidas Comuns sobre o GastoNosso</h2>
-        <div class="accordion" id="faqAccordion">
-            <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">É seguro para minha família usar?</button></h2>
-                <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body"><strong>Sim.</strong> O GastoNosso usa as melhores práticas de segurança do Django. A aplicação online é hospedada em servidores seguros e o banco de dados é protegido.</div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">Como convido meu parceiro(a)?</button></h2>
-                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body">É muito simples! Após criar sua conta e sua "Família", você recebe um código de convite. Basta compartilhá-lo para que outros membros se cadastrem e entrem no seu espaço financeiro compartilhado.</div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">Preciso instalar algum programa?</button></h2>
-                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body"><strong>Não!</strong> O GastoNosso é 100% online. Você e sua família podem acessá-lo de qualquer navegador, seja no computador, tablet ou celular.</div>
-                </div>
-            </div>
-        </div>
-    </div>
+  </section>
 
-    <div class="container text-center py-5">
-        <h2 class="display-6 fw-bold">Pronto para organizar o GastoNosso?</h2>
-        <p class="lead my-4">Crie sua conta familiar gratuita e comece a ter clareza e controle hoje mesmo.</p>
-        <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">Começar Gratuitamente</a>
+  <!-- RECURSOS -->
+  <section class="gn-section" id="recursos">
+    <div class="container py-5">
+      <h2 class="text-center fw-bold mb-4">Recursos que vendem o valor</h2>
+      <div class="row g-4 row-cols-1 row-cols-md-3">
+        <div class="col">
+          <div class="gn-card h-100">
+            <div class="fs-1 text-success mb-2"><i class="bi bi-wallet2"></i></div>
+            <h3 class="fs-5 fw-semibold">Carteiras e categorias</h3>
+            <p>Organize por contas e categorias; veja limites e sobras de cada área da casa.</p>
+          </div>
+        </div>
+        <div class="col">
+          <div class="gn-card h-100">
+            <div class="fs-1 text-success mb-2"><i class="bi bi-tags"></i></div>
+            <h3 class="fs-5 fw-semibold">Rateio inteligente</h3>
+            <p>Defina pesos por pessoa (ex.: moradia 50/50, mercado 40/60) e pare as discussões.</p>
+          </div>
+        </div>
+        <div class="col">
+          <div class="gn-card h-100">
+            <div class="fs-1 text-success mb-2"><i class="bi bi-bell"></i></div>
+            <h3 class="fs-5 fw-semibold">Alertas e metas</h3>
+            <p>Receba avisos antes de estourar o orçamento e acompanhe objetivos em conjunto.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center mt-4">
+        <a href="{% url 'register' %}" class="btn btn-success btn-lg gn-btn">Quero experimentar agora</a>
+      </div>
     </div>
-  </main>
-  
-  <footer class="text-muted py-5 bg-dark-subtle">
-    <div class="container">
-      <p class="float-end mb-1"><a href="#">Voltar ao topo</a></p>
-      <p class="mb-1">© {% now "Y" %} GastoNosso.</p>
-      <p class="mb-0">Construído com Python e Django.</p>
+  </section>
+
+  <!-- DEPOIMENTOS -->
+  <section class="container py-5" id="depoimentos">
+    <h2 class="text-center fw-bold mb-4">Amor no bolso e paz em casa</h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="gn-testimonial h-100">
+          <p>“Acabaram as brigas de quem pagou o quê. O rateio automático salvou nosso mês.”</p>
+          <div class="who"><i class="bi bi-person-circle me-1"></i> Ana & Marcos</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="gn-testimonial h-100">
+          <p>“Em 15 dias, entendemos para onde ia 27% do nosso dinheiro. Cortamos e sobrou.”</p>
+          <div class="who"><i class="bi bi-person-circle me-1"></i> Família Souza</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="gn-testimonial h-100">
+          <p>“É o app que finalmente dá uma visão da família inteira — sem planilha.”</p>
+          <div class="who"><i class="bi bi-person-circle me-1"></i> Júlia</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLOCO DE CONVERSÃO FINAL -->
+  <section class="gn-cta">
+    <div class="container text-center py-5">
+      <h3 class="fw-bold mb-2">Pronto para organizar o GastoNosso?</h3>
+      <p class="lead mb-4">Leva menos de 2 minutos para começar. Sem cartão na etapa inicial.</p>
+      <a href="{% url 'register' %}" class="btn btn-success btn-lg gn-btn pulse">Começar gratuitamente</a>
+      <div class="small text-success mt-3"><i class="bi bi-patch-check"></i> Cancelamento em 1 clique</div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="container py-5">
+    <h2 class="text-center fw-bold mb-4">Dúvidas comuns</h2>
+    <div class="accordion" id="faqAccordion">
+      <div class="accordion-item">
+        <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f1">É seguro para minha família usar?</button></h2>
+        <div id="f1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+          <div class="accordion-body">Sim. Seguimos boas práticas do Django, criptografia em trânsito e segregação por família. Integrações de pagamento usam Stripe.</div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f2">Como convido meu parceiro(a)?</button></h2>
+        <div id="f2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+          <div class="accordion-body">Depois de criar sua família, compartilhe o código de convite. A pessoa entra e já vê o mesmo orçamento.</div>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#f3">Tem versão mobile?</button></h2>
+        <div id="f3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+          <div class="accordion-body">Sim. A aplicação é PWA-friendly e funciona perfeitamente no celular, tablet e desktop.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-4 border-top bg-white">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center">
+      <p class="mb-0 text-muted">© {% now "Y" %} GastoNosso</p>
+      <a id="contato" class="small text-muted" href="mailto:contato@gastonosso.com.br">contato@gastonosso.com.br</a>
     </div>
   </footer>
 
