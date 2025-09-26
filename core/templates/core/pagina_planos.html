@@ -1,0 +1,48 @@
+{% extends 'core/base.html' %}
+{% load humanize %}
+
+{% block title %}Planos e Assinatura{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1>Nossos Planos</h1>
+    <p class="lead text-muted">Escolha o plano que melhor se adapta à sua jornada financeira.</p>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 mb-3 text-center justify-content-center">
+    {% for plano in planos %}
+    <div class="col">
+        <div class="card mb-4 rounded-3 shadow-sm {% if plano == assinatura_atual.plano %}border-primary{% endif %}">
+            <div class="card-header py-3 {% if plano == assinatura_atual.plano %}text-bg-primary border-primary{% endif %}">
+                <h4 class="my-0 fw-normal">{{ plano.nome }}</h4>
+            </div>
+            <div class="card-body">
+                <h1 class="card-title pricing-card-title">R$ {{ plano.preco_mensal|floatformat:2|intcomma }}<small class="text-muted fw-light">/mês</small></h1>
+                <ul class="list-unstyled mt-3 mb-4">
+                    {% if plano.is_free %}
+                        <li>Controle individual completo</li>
+                        <li>Análises e gráficos pessoais</li>
+                        <li>Cadastro ilimitado de transações</li>
+                        <li class="text-muted"><del>Orçamento Familiar Compartilhado</del></li>
+                    {% else %}
+                        <li><strong>Tudo do plano Gratuito, e mais:</strong></li>
+                        <li>Orçamento Familiar Compartilhado</li>
+                        <li>Visão Consolidada dos Gastos</li>
+                        <li>Metas e Investimentos em Família</li>
+                    {% endif %}
+                </ul>
+
+                {% if plano == assinatura_atual.plano %}
+                    <button type="button" class="w-100 btn btn-lg btn-outline-primary" disabled>Seu Plano Atual</button>
+                {% else %}
+                    {% if plano.is_free %}
+                        {% else %}
+                        <a href="#" class="w-100 btn btn-lg btn-primary">Fazer Upgrade</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -5,27 +5,31 @@ from django.contrib.auth.models import User
 from django.db.models import Sum
 from datetime import date
 from dateutil.relativedelta import relativedelta
-from decimal import Decimal # Garanta que este import está no topo do arquivo
+from decimal import Decimal
 
 # --- Modelos Estruturais para Compartilhamento ---
 
 class Familia(models.Model):
-    """Representa um grupo familiar ou um espaço financeiro compartilhado."""
     nome = models.CharField(max_length=100)
     codigo_convite = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
     def __str__(self):
         return self.nome
 
+    # --- NOVO MÉTODO ---
+    def has_premium(self):
+        """Verifica se a família tem uma assinatura ativa e paga."""
+        # hasattr verifica se o objeto 'assinatura' já foi carregado
+        if hasattr(self, 'assinatura') and self.assinatura.status == 'ativa':
+            return not self.assinatura.plano.is_free()
+        return False
+
 class Perfil(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    familia = models.ForeignKey(Familia, on_delete=models.SET_NULL, null=True, blank=True)
+    familia = models.ForeignKey('Familia', on_delete=models.SET_NULL, null=True, blank=True)
     primeiro_acesso_concluido = models.BooleanField(default=False)
-    # NOVO CAMPO
-    etapa_onboarding = models.IntegerField(default=1, help_text="Controla a etapa do tutorial de primeiros passos.")
-
-    def __str__(self):
-        return self.user.username
+    etapa_onboarding = models.IntegerField(default=1, help_text="Controla a etapa do tutorial.")
+    def __str__(self): return self.user.username
 # --- Modelos de Configuração (Compartilhados pela Família) ---
 
 class Categoria(models.Model):
@@ -237,3 +241,26 @@ class AporteInvestimento(models.Model):
 
     def __str__(self):
         return f"Aporte de R$ {self.valor} em {self.investimento.nome} por {self.user.username}"
+    
+class Plano(models.Model):
+    nome = models.CharField(max_length=50, unique=True)
+    preco_mensal = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    stripe_price_id = models.CharField(max_length=100, blank=True, null=True, help_text="ID do Preço no gateway de pagamento (Stripe)")
+    def is_free(self): return self.preco_mensal == 0
+    def __str__(self): return self.nome
+
+class Assinatura(models.Model):
+    class StatusAssinatura(models.TextChoices):
+        ATIVA = 'ativa', 'Ativa'
+        CANCELADA = 'cancelada', 'Cancelada'
+        INADIMPLENTE = 'inadimplente', 'Inadimplente'
+        INCOMPLETA = 'incompleta', 'Incompleta'
+    
+    familia = models.OneToOneField('Familia', on_delete=models.CASCADE, related_name='assinatura')
+    plano = models.ForeignKey('Plano', on_delete=models.SET_NULL, null=True)
+    stripe_subscription_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    status = models.CharField(max_length=20, choices=StatusAssinatura.choices, default=StatusAssinatura.INCOMPLETA)
+    data_inicio = models.DateTimeField(auto_now_add=True)
+    data_cancelamento = models.DateTimeField(blank=True, null=True)
+    data_fim_periodo_atual = models.DateTimeField(blank=True, null=True)
+    def __str__(self): return f"Assinatura da {self.familia.nome} - Plano {self.plano.nome} ({self.status})"

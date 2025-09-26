@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Categoria, Despesa, Conta, CartaoDeCredito, Receita, CategoriaReceita,
-    MetaFinanceira, Familia, Perfil, Investimento, AporteInvestimento # Adicione os novos
+    MetaFinanceira, Familia, Perfil, Investimento, AporteInvestimento, Plano, Assinatura
 )
 
 # ... (todos os outros registros: admin.site.register(Categoria), etc.)
@@ -18,3 +18,6 @@ admin.site.register(Perfil)
 # Adicione estas duas linhas
 admin.site.register(Investimento)
 admin.site.register(AporteInvestimento)
+
+admin.site.register(Plano)
+admin.site.register(Assinatura)

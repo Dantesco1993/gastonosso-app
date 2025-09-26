@@ -29,6 +29,7 @@ def detalhe_conta(request, id):
     familia = user.perfil.familia
     conta = get_object_or_404(Conta, id=id, familia=familia)
     
+    has_premium_access = familia.has_premium() if familia else False
     visao = request.GET.get('visao', 'individual')
     periodo = request.GET.get('periodo', 'realizado')
     if visao == 'individual' or not familia:
@@ -42,6 +43,7 @@ def detalhe_conta(request, id):
     despesas = Despesa.objects.filter(user__in=usuarios_a_filtrar, conta=conta).order_by('-data')
     receitas = Receita.objects.filter(user__in=usuarios_a_filtrar, conta=conta).order_by('-data')
     contexto = {
+        'has_premium_access': has_premium_access,
         'conta': conta, 'saldo_atual': saldo_atual,
         'despesas': despesas, 'receitas': receitas,
         'visao': visao, 'periodo': periodo, 'familia': familia, 'data_projecao': data_limite

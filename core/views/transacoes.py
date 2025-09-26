@@ -14,6 +14,7 @@ def lista_despesas(request):
     user = request.user
     familia = user.perfil.familia
     
+    has_premium_access = familia.has_premium() if familia else False
     visao = request.GET.get('visao', 'individual')
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
@@ -42,6 +43,7 @@ def lista_despesas(request):
                 paginator = Paginator(despesas_list, 20)
                 page_obj = paginator.get_page(1)
                 contexto = {
+                    'has_premium_access': has_premium_access,
                     'page_obj': page_obj,
                     'form': DespesaForm(user=user), # <<< CORREÇÃO: Envia um formulário novo e limpo
                     'visao': visao, 
@@ -120,6 +122,7 @@ def lista_receitas(request):
     user = request.user
     familia = user.perfil.familia
     
+    has_premium_access = familia.has_premium() if familia else False
     visao = request.GET.get('visao', 'individual')
     if visao == 'individual' or not familia:
         usuarios_a_filtrar = [user]
@@ -139,6 +142,7 @@ def lista_receitas(request):
                 paginator = Paginator(receitas_list, 20)
                 page_obj = paginator.get_page(1)
                 contexto = {
+                    'has_premium_access': has_premium_access,
                     'page_obj': page_obj,
                     'form': ReceitaForm(user=user),
                     'visao': visao, 'familia': familia

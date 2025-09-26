@@ -1,10 +1,18 @@
 {% if familia %}
 <div class="btn-group" role="group">
-    <a href="?visao=individual" class="btn {% if visao == 'individual' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
+    <a href="?visao=individual&periodo={{ periodo }}" class="btn {% if visao == 'individual' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
         <i class="bi bi-person"></i> Minha Visão
     </a>
-    <a href="?visao=conjunto" class="btn {% if visao == 'conjunto' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
-        <i class="bi bi-people"></i> Visão da Família
-    </a>
+    {% if has_premium_access %}
+        <a href="?visao=conjunto&periodo={{ periodo }}" class="btn {% if visao == 'conjunto' %}btn-primary{% else %}btn-outline-primary{% endif %} btn-sm">
+            <i class="bi bi-people"></i> Visão da Família
+        </a>
+    {% else %}
+        <a href="{% url 'pagina_planos' %}" class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" title="Funcionalidade Premium. Clique para fazer o upgrade!">
+            <button class="btn btn-outline-primary btn-sm" type="button" disabled style="pointer-events: none;">
+                <i class="bi bi-people-fill"></i> Visão da Família <i class="bi bi-lock-fill"></i>
+            </button>
+        </a>
+    {% endif %}
 </div>
 {% endif %}

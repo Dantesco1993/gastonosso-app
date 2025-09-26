@@ -7,10 +7,10 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from django.db.models.functions import TruncMonth, TruncWeek, TruncDay
 from django.http import HttpResponse
-from itertools import chain       # <<< IMPORTAÇÃO ADICIONADA
-from operator import attrgetter   # <<< IMPORTAÇÃO ADICIONADA
-from django.core.paginator import Paginator # <<< IMPORTAÇÃO ADICIONADA
-
+from itertools import chain
+from operator import attrgetter
+from django.core.paginator import Paginator
+from decimal import Decimal # <<< IMPORTAÇÃO ADICIONADA
 
 from core.models import (
     Despesa, Receita, MetaFinanceira, Categoria, Conta, Investimento, 
@@ -21,6 +21,12 @@ from core.forms import MetaFinanceiraForm, AporteForm
 def analise_gastos(request):
     user = request.user
     familia = user.perfil.familia
+
+    has_premium_access = familia.has_premium() if familia else False
+    visao = request.GET.get('visao', 'individual')
+    if visao == 'conjunto' and not has_premium_access:
+        visao = 'individual'
+
     hoje = date.today()
 
     # --- Lógica de Filtros (sem alteração) ---
@@ -84,6 +90,7 @@ def analise_gastos(request):
     data_despesas_bar = [float(next((item['total'] for item in despesas if item['periodo_agrupado'] == p), 0)) for p in periodos]
 
     contexto = {
+        'has_premium_access': has_premium_access,
         'gastos_por_categoria': gastos_por_categoria, 'labels_pie': labels_pie, 'data_pie': data_pie, 'visao': visao,
         'periodo': periodo, 'data_inicio': data_inicio, 'data_fim': data_fim, 'familia': familia, 'labels_bar': labels_bar,
         'data_receitas_bar': data_receitas_bar, 'data_despesas_bar': data_despesas_bar, 'agrupamento': agrupamento,
@@ -271,3 +278,78 @@ def evolucao_patrimonio(request):
         'visao': visao, 'periodo': periodo, 'familia': familia,
     }
     return render(request, 'core/evolucao_patrimonio.html', contexto)
+
+@login_required
+def orcamento_50_30_20(request):
+    user = request.user
+    familia = user.perfil.familia
+    hoje = date.today()
+
+    # Filtros de visão e data (vamos usar o mês atual para esta análise)
+    visao = request.GET.get('visao', 'individual')
+    if visao == 'individual' or not familia:
+        usuarios_a_filtrar = [user]
+    else:
+        usuarios_a_filtrar = User.objects.filter(perfil__familia=familia)
+
+    # 1. Calcular a Renda Total do Mês
+    receita_total_mes = Receita.objects.filter(
+        user__in=usuarios_a_filtrar,
+        data__year=hoje.year,
+        data__month=hoje.month
+    ).aggregate(total=Sum('valor'))['total'] or Decimal('0.00')
+
+    # 2. Calcular os Alvos (50/30/20)
+    alvos = {
+        'necessidades': receita_total_mes * Decimal('0.5'),
+        'desejos': receita_total_mes * Decimal('0.3'),
+        'metas': receita_total_mes * Decimal('0.2'),
+    }
+
+    # 3. Calcular os Gastos Reais por Macro-Categoria
+    gastos_reais_query = Despesa.objects.filter(
+        user__in=usuarios_a_filtrar,
+        data__year=hoje.year,
+        data__month=hoje.month
+    ).values('categoria__macro_categoria').annotate(total=Sum('valor'))
+    
+    gastos_reais = {
+        item['categoria__macro_categoria']: item['total'] for item in gastos_reais_query
+    }
+
+    # 4. Preparar dados para o template
+    dados_orcamento = {
+        'necessidades': {
+            'nome': 'Necessidades',
+            'alvo_percentual': 50,
+            'alvo_valor': alvos['necessidades'],
+            'gasto_real': gastos_reais.get(Categoria.MacroCategoria.NECESSIDADE, Decimal('0.00')),
+        },
+        'desejos': {
+            'nome': 'Desejos Pessoais',
+            'alvo_percentual': 30,
+            'alvo_valor': alvos['desejos'],
+            'gasto_real': gastos_reais.get(Categoria.MacroCategoria.DESEJO, Decimal('0.00')),
+        },
+        'metas': {
+            'nome': 'Metas Financeiras',
+            'alvo_percentual': 20,
+            'alvo_valor': alvos['metas'],
+            'gasto_real': gastos_reais.get(Categoria.MacroCategoria.META, Decimal('0.00')),
+        }
+    }
+    
+    for chave, valor in dados_orcamento.items():
+        if valor['alvo_valor'] > 0:
+            valor['progresso'] = min((valor['gasto_real'] / valor['alvo_valor']) * 100, 100)
+        else:
+            valor['progresso'] = 0
+        valor['restante'] = valor['alvo_valor'] - valor['gasto_real']
+
+    contexto = {
+        'receita_total_mes': receita_total_mes,
+        'dados_orcamento': dados_orcamento,
+        'visao': visao,
+        'familia': familia,
+    }
+    return render(request, 'core/orcamento_50_30_20.html', contexto)

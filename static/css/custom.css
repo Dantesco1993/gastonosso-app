@@ -1,20 +1,24 @@
+/* ---- Estilos Globais ---- */
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #f8f9fa;
+    background-color: #f8f9fa; /* Um cinza bem claro para o fundo da página */
 }
 
+/* Aplica uma fonte mais estilizada para títulos, botões e o nome do site */
 h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
     font-family: 'Poppins', sans-serif;
 }
 
+/* Adiciona um pouco mais de "respiro" (espaçamento interno) aos cards */
 .card-body {
     padding: 1.5rem;
 }
 
-/* --- NOVOS ESTILOS PARA A LANDING PAGE --- */
+/* --- Estilos Específicos da Landing Page --- */
 
 .hero-section {
-    background-color: #f8f9fa;
+    /* Um gradiente suave de um cinza claro para um quase branco */
+    background: linear-gradient(135deg, #f0f2f5 0%, #ffffff 100%);
 }
 
 .feature-icon {
@@ -26,7 +30,6 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
     border-left: 5px solid var(--bs-primary);
 }
 
-/* Estilo para a seção "Como Visto Em" */
 .social-proof-section {
     background-color: #ffffff;
     padding: 2rem 0;
@@ -44,7 +47,6 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
     opacity: 1;
 }
 
-/* Estilo para a seção de funcionalidades com imagem */
 .featurette-divider {
     margin: 5rem 0; 
 }
@@ -52,4 +54,15 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .btn {
 .featurette-image {
     border-radius: 8px;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* --- Animação de Flutuação --- */
+@keyframes float-animation {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+.hero-image-animated {
+    animation: float-animation 6s ease-in-out infinite;
 }

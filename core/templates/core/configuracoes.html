@@ -16,10 +16,12 @@
 {% endif %}
 
 <div class="card mb-4 shadow-sm">
-    <div class="card-body">
-        <h5 class="card-title">Gerenciamento da Família</h5>
-        <p class="card-text">Crie ou gerencie os membros da sua família para compartilhar o orçamento.</p>
-        <a href="{% url 'gerenciar_familia' %}" class="btn btn-primary">Gerenciar Família</a>
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="card-title">Gerenciamento da Família e Assinatura</h5>
+            <p class="card-text mb-0">Gerencie os membros da sua família e seu plano de assinatura.</p>
+        </div>
+        <a href="{% url 'pagina_planos' %}" class="btn btn-primary">Ver Planos e Assinatura</a>
     </div>
 </div>
 

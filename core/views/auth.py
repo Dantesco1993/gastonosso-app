@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required # <<< IMPORTAÇÃO ADICIONADA
 from core.forms import CustomUserCreationForm
-from core.models import Familia, Perfil, Categoria, CategoriaReceita, Conta
+from core.models import Familia, Perfil, Categoria, CategoriaReceita, Conta,Plano, Assinatura
 from core.forms import EntrarFamiliaForm, CategoriaReceitaForm, ContaForm
 
 def register(request):
@@ -124,3 +124,20 @@ def redirect_apos_login(request):
         return redirect('dashboard')
     else:
         return redirect('primeiros_passos')
+    
+@login_required
+def pagina_planos(request):
+    planos = Plano.objects.all().order_by('preco_mensal')
+    
+    assinatura_atual = None
+    if request.user.perfil.familia:
+        try:
+            assinatura_atual = request.user.perfil.familia.assinatura
+        except Assinatura.DoesNotExist:
+            assinatura_atual = None
+
+    contexto = {
+        'planos': planos,
+        'assinatura_atual': assinatura_atual,
+    }
+    return render(request, 'core/pagina_planos.html', contexto)

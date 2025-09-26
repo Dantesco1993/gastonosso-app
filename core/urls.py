@@ -7,6 +7,7 @@ urlpatterns = [
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register, name='register'),
+    path('planos/', views.pagina_planos, name='pagina_planos'),
     path('bemvindo/', views.landing_page, name='landing_page'),
     path('primeiros-passos/', views.primeiros_passos, name='primeiros_passos'),
     path('primeiros-passos/concluir/', views.concluir_primeiros_passos, name='concluir_primeiros_passos'),
@@ -42,6 +43,7 @@ urlpatterns = [
     path('orcamento/', views.orcamento_mensal, name='orcamento_mensal'),
     path('patrimonio/', views.evolucao_patrimonio, name='evolucao_patrimonio'),
     path('relatorio/', views.relatorio_transacoes, name='relatorio_transacoes'),
+    path('orcamento-50-30-20/', views.orcamento_50_30_20, name='orcamento_50_30_20'),
     path('metas/', views.lista_metas, name='lista_metas'),
     path('metas/<int:id>/aporte/', views.adicionar_aporte, name='adicionar_aporte'),
 
