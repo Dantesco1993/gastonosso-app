@@ -1,10 +1,11 @@
+{% load static %}
 <!doctype html>
 <html lang="pt-br">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Plenus - Sua Jornada para a Plenitude Financeira</title> {# Título da página atualizado #}
-  {% load static %}
+  <title>GastoNosso - O Orçamento Familiar, Simplificado.</title>
+  
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,68 +16,64 @@
 <body>
 
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
-    <div class="container">
+    <div class="container-fluid">
       <a class="navbar-brand fw-bold" href="#">
-        <i class="bi bi-wallet2"></i> Plenus {# Nome do produto no cabeçalho #}
+        <i class="bi bi-people"></i> GastoNosso
       </a>
       <div class="d-flex">
         <a href="{% url 'login' %}" class="btn btn-outline-light me-2">Entrar</a>
-        <a href="{% url 'register' %}" class="btn btn-primary">Começar Jornada</a> {# CTA no cabeçalho #}
+        <a href="{% url 'register' %}" class="btn btn-primary">Começar a Usar</a>
       </div>
     </div>
   </nav>
 
   <header class="hero-section">
-    <div class="container col-xxl-8 px-4 py-5">
-      <div class="row flex-lg-row-reverse align-items-center g-5 py-5">
-        <div class="col-10 col-sm-8 col-lg-6">
-          <img src="{% static 'images/landing/hero-illustration.svg' %}" class="d-block mx-lg-auto img-fluid" alt="Planejamento Financeiro">
-        </div>
-        <div class="col-lg-6">
-          <h1 class="display-4 fw-bold text-body-emphasis lh-1 mb-3">Plenitude Financeira ao Seu Alcance.</h1> {# Novo H1 #}
-          <p class="lead">Com o Plenus, transforme sua relação com o dinheiro. Planeje com clareza, prospere em família e construa o futuro que você sempre sonhou, sem complicações.</p> {# Novo parágrafo de apoio #}
-          <div class="d-grid gap-2 d-md-flex justify-content-md-start mt-4">
-            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 me-md-2">Inicie sua Jornada Plenus</a> {# CTA principal #}
+    <div class="container px-4 py-5 text-center">
+      <h1 class="display-5 fw-bold text-body-emphasis mb-4">O orçamento familiar, sem estresse.</h1>
+      <div class="row align-items-center g-lg-5 py-5">
+        <div class="col-lg-7 text-center text-lg-start">
+          <p class="lead">Com o **GastoNosso**, casais e famílias finalmente têm um lugar central para planejar, registrar e analisar as finanças em conjunto. Transparência e colaboração, sem planilhas complicadas.</p>
+          <div class="d-grid gap-2 d-md-flex justify-content-md-center justify-content-lg-start">
+            <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-4 me-md-2">Organize seu GastoNosso</a>
           </div>
+        </div>
+        <div class="col-md-10 mx-auto col-lg-5">
+            <img src="{% static 'images/landing/hero-illustration.svg' %}" class="img-fluid" alt="Orçamento Familiar" loading="lazy">
         </div>
       </div>
     </div>
   </header>
   
   <main>
-    
-    <div class="container px-4 py-5">
-      <hr class="featurette-divider">
-      <div class="row featurette align-items-center">
-        <div class="col-md-7">
-          <h2 class="featurette-heading fw-normal lh-1">Visualize seu mundo financeiro. <span class="text-muted">Desbloqueie insights.</span></h2> {# Título atualizado #}
-          <p class="lead">O dashboard intuitivo do Plenus transforma números em clareza, mostrando seu patrimônio, fluxo de caixa e progressos em um piscar de olhos. Tome decisões mais inteligentes.</p> {# Texto atualizado #}
+    <div class="container px-4 py-5" id="benefits">
+      <h2 class="pb-2 border-bottom text-center">Controle compartilhado, decisões alinhadas.</h2>
+      <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="feature col text-center">
+          <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3"><i class="bi bi-person-hearts"></i></div>
+          <h3 class="fs-4">Visão Individual e Conjunta</h3>
+          <p>Veja apenas seus gastos ou o panorama completo da família com um único clique. Total privacidade e total transparência, quando você precisar.</p>
         </div>
-        <div class="col-md-5">
-          <img src="{% static 'images/landing/feature-dashboard.png' %}" class="featurette-image img-fluid mx-auto" alt="Dashboard da Aplicação">
+        <div class="feature col text-center">
+          <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3"><i class="bi bi-check2-circle"></i></div>
+          <h3 class="fs-4">Orçamento Único e Simples</h3>
+          <p>Definam limites de gastos por categoria para a família inteira e acompanhem o progresso juntos. Saibam exatamente para onde o dinheiro está indo, a qualquer momento.</p>
         </div>
-      </div>
-      <hr class="featurette-divider">
-      <div class="row featurette align-items-center">
-        <div class="col-md-7 order-md-2">
-          <h2 class="featurette-heading fw-normal lh-1">Construa seu legado. <span class="text-muted">Prospere em cada etapa.</span></h2> {# Título atualizado #}
-          <p class="lead">Com o Plenus, defina e alcance metas ambiciosas, otimize seus investimentos e projete um futuro financeiro sólido, seja individualmente ou em conjunto com sua família.</p> {# Texto atualizado #}
-        </div>
-        <div class="col-md-5 order-md-1">
-          <img src="{% static 'images/landing/feature-planning.png' %}" class="featurette-image img-fluid mx-auto" alt="Página de Orçamento">
+        <div class="feature col text-center">
+          <div class="feature-icon d-inline-flex align-items-center justify-content-center fs-2 mb-3"><i class="bi bi-bullseye"></i></div>
+          <h3 class="fs-4">Metas em Comum</h3>
+          <p>Planejem aquela viagem ou a entrada da casa nova como um time. Criem metas financeiras compartilhadas e vejam o progresso de cada aporte em tempo real.</p>
         </div>
       </div>
-      <hr class="featurette-divider">
     </div>
-
+    
     <div class="bg-light">
         <div class="container px-4 py-5">
-            <h2 class="text-center mb-5">Quem já alcançou a plenitude com Plenus?</h2> {# Título dos depoimentos #}
+            <h2 class="text-center mb-5">Quem já está planejando junto com o GastoNosso?</h2>
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 border-0 shadow-sm testimonial-card">
                         <div class="card-body">
-                            <p class="card-text">"O Plenus mudou a dinâmica financeira da nossa casa. Conseguimos alinhar nossos objetivos e, pela primeira vez, vemos nosso futuro com clareza."</p> {# Depoimento atualizado #}
+                            <p class="card-text">"Finalmente uma ferramenta que meu marido e eu conseguimos usar juntos! O GastoNosso acabou com as discussões sobre o orçamento."</p>
                             <footer class="blockquote-footer mt-2">Ana P., Designer</footer>
                         </div>
                     </div>
@@ -84,7 +81,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 border-0 shadow-sm testimonial-card">
                         <div class="card-body">
-                            <p class="card-text">"Ver o crescimento do meu patrimônio com o Plenus é incrivelmente motivador. É mais que um app, é um parceiro na construção da minha liberdade financeira."</p> {# Depoimento atualizado #}
+                            <p class="card-text">"Ver o crescimento do nosso patrimônio como família é incrivelmente motivador. É mais que um app, é um parceiro na construção dos nossos sonhos."</p>
                             <footer class="blockquote-footer mt-2">Marcos L., Desenvolvedor</footer>
                         </div>
                     </div>
@@ -92,7 +89,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="card h-100 border-0 shadow-sm testimonial-card">
                         <div class="card-body">
-                            <p class="card-text">"A simplicidade e o poder do Plenus me surpreenderam. Finalmente tenho uma visão completa e sem dores de cabeça para gerenciar minhas finanças."</p> {# Depoimento atualizado #}
+                            <p class="card-text">"Simples, direto e sem a complexidade dos grandes bancos. Cadastrar um gasto recorrente da casa leva 10 segundos. Recomendo!"</p>
                             <footer class="blockquote-footer mt-2">Julia S., Autônoma</footer>
                         </div>
                     </div>
@@ -102,40 +99,40 @@
     </div>
     
     <div class="container px-4 py-5">
-        <h2 class="text-center mb-5">Dúvidas Comuns sobre o Plenus</h2> {# Título FAQ #}
+        <h2 class="text-center mb-5">Dúvidas Comuns sobre o GastoNosso</h2>
         <div class="accordion" id="faqAccordion">
             <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">O Plenus é seguro para meus dados financeiros?</button></h2> {# Pergunta atualizada #}
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">É seguro para minha família usar?</button></h2>
                 <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body"><strong>Sim.</strong> Este é um projeto de portfólio e usa as melhores práticas de segurança do Django, mas recomendamos o uso de dados fictícios para sua tranquilidade. A aplicação online é hospedada em servidores seguros e o banco de dados é protegido.</div>
+                    <div class="accordion-body"><strong>Sim.</strong> O GastoNosso usa as melhores práticas de segurança do Django. A aplicação online é hospedada em servidores seguros e o banco de dados é protegido.</div>
                 </div>
             </div>
             <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">Posso gerenciar minhas finanças em conjunto com minha família no Plenus?</button></h2> {# Pergunta atualizada #}
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">Como convido meu parceiro(a)?</button></h2>
                 <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body"><strong>Com certeza!</strong> O Plenus foi projetado com a família em mente. Após criar sua conta e sua "Família", você recebe um código de convite. Basta compartilhá-lo para que outros membros se cadastrem e entrem no seu espaço compartilhado, facilitando o planejamento conjunto.</div>
+                    <div class="accordion-body">É muito simples! Após criar sua conta e sua "Família", você recebe um código de convite. Basta compartilhá-lo para que outros membros se cadastrem e entrem no seu espaço financeiro compartilhado.</div>
                 </div>
             </div>
             <div class="accordion-item">
-                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">Preciso instalar algo para usar o Plenus?</button></h2> {# Pergunta atualizada #}
+                <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">Preciso instalar algum programa?</button></h2>
                 <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body"><strong>Não!</strong> O Plenus é 100% online. Você pode acessá-lo de qualquer navegador moderno, seja no computador, tablet ou celular, sem necessidade de instalações.</div>
+                    <div class="accordion-body"><strong>Não!</strong> O GastoNosso é 100% online. Você e sua família podem acessá-lo de qualquer navegador, seja no computador, tablet ou celular.</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="container text-center py-5">
-        <h2 class="display-6 fw-bold">Pronto para sua Plenitude Financeira?</h2> {# Título CTA final #}
-        <p class="lead my-4">Comece sua jornada com o Plenus agora. É simples, intuitivo e gratuito para você dar o primeiro passo.</p> {# Texto CTA final #}
-        <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">Experimente o Plenus Gratuitamente</a> {# CTA final #}
+        <h2 class="display-6 fw-bold">Pronto para organizar o GastoNosso?</h2>
+        <p class="lead my-4">Crie sua conta familiar gratuita e comece a ter clareza e controle hoje mesmo.</p>
+        <a href="{% url 'register' %}" class="btn btn-primary btn-lg px-5">Começar Gratuitamente</a>
     </div>
   </main>
   
   <footer class="text-muted py-5 bg-dark-subtle">
     <div class="container">
       <p class="float-end mb-1"><a href="#">Voltar ao topo</a></p>
-      <p class="mb-1">© {% now "Y" %} Plenus.</p> {# Nome no rodapé #}
+      <p class="mb-1">© {% now "Y" %} GastoNosso.</p>
       <p class="mb-0">Construído com Python e Django.</p>
     </div>
   </footer>

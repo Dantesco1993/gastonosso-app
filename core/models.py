@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models import Sum
 from datetime import date
 from dateutil.relativedelta import relativedelta
+from decimal import Decimal # Garanta que este import está no topo do arquivo
 
 # --- Modelos Estruturais para Compartilhamento ---
 
@@ -79,27 +80,18 @@ class Conta(models.Model):
     def __str__(self):
         return self.nome
 
-    # --- MÉTODO ATUALIZADO ---
     def get_saldo_atual(self, usuarios, data_base=None):
-        """
-        Calcula o saldo realizado da conta com base em uma lista de usuários
-        até uma data de referência (data_base).
-        """
+        """Calcula o saldo realizado da conta com base em uma lista de usuários e uma data de referência."""
         if data_base is None:
             data_base = date.today()
         
         user_ids = [u.id for u in usuarios]
         
-        # O filtro de data agora usa exclusivamente a data_base fornecida
         filtro_data = models.Q(data__lte=data_base)
 
-        receitas = Receita.objects.filter(
-            filtro_data, user_id__in=user_ids, conta=self
-        ).aggregate(total=Sum('valor'))['total'] or 0
-        
-        despesas = Despesa.objects.filter(
-            filtro_data, user_id__in=user_ids, conta=self
-        ).aggregate(total=Sum('valor'))['total'] or 0
+        # CORRIGIDO: usa or Decimal('0.00') para manter o tipo consistente
+        receitas = Receita.objects.filter(filtro_data, user_id__in=user_ids, conta=self).aggregate(total=Sum('valor'))['total'] or Decimal('0.00')
+        despesas = Despesa.objects.filter(filtro_data, user_id__in=user_ids, conta=self).aggregate(total=Sum('valor'))['total'] or Decimal('0.00')
         
         return (self.saldo_inicial + receitas) - despesas
 
