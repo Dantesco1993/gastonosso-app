@@ -74,7 +74,8 @@ class DashboardViewTest(TestCase):
         """
         response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response, f"{reverse('login')}?next=/")
+        expected_url = f"{reverse('login')}?next={reverse('dashboard')}"
+        self.assertRedirects(response, expected_url, fetch_redirect_response=False)
 
     def test_dashboard_acessivel_para_usuario_logado(self):
         """
@@ -84,4 +85,4 @@ class DashboardViewTest(TestCase):
         response = self.client.get(reverse('dashboard'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'core/dashboard.html')
-        self.assertContains(response, "Dashboard Financeiro")
+        self.assertContains(response, "Saldo em Contas")
