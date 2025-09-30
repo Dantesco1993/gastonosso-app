@@ -1,4 +1,6 @@
 import uuid
+from typing import Callable
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -8,6 +10,24 @@ from django.core.paginator import Paginator
 
 from core.models import Despesa, Receita
 from core.forms import DespesaForm, ReceitaForm, RecorrenteDespesaForm, RecorrenteReceitaForm
+
+
+FREQUENCIA_DELTAS: dict[str, Callable[[int], relativedelta]] = {
+    'semanal': lambda i: relativedelta(weeks=i),
+    'quinzenal': lambda i: relativedelta(weeks=i * 2),
+    'mensal': lambda i: relativedelta(months=i),
+    'trimestral': lambda i: relativedelta(months=i * 3),
+    'semestral': lambda i: relativedelta(months=i * 6),
+    'anual': lambda i: relativedelta(years=i),
+}
+
+
+def calcular_delta_recorrencia(frequencia: str, indice: int) -> relativedelta:
+    try:
+        factory = FREQUENCIA_DELTAS[frequencia]
+    except KeyError as exc:  # pragma: no cover - ChoiceField evita uso inválido
+        raise ValueError(f"Frequência de recorrência inválida: {frequencia}") from exc
+    return factory(indice)
 
 @login_required
 def lista_despesas(request):
@@ -98,13 +118,7 @@ def adicionar_despesa_recorrente(request):
             dados = form.cleaned_data
             id_rec = uuid.uuid4()
             for i in range(dados['repeticoes']):
-                if dados['frequencia'] == 'semanal': delta = relativedelta(weeks=i)
-                elif dados['frequencia'] == 'quinzenal': delta = relativedelta(weeks=i*2)
-                elif dados['frequencia'] == 'mensal': delta = relativedelta(months=i)
-                elif dados['frequencia'] == 'trimestral': delta = relativedelta(months=i*3)
-                elif dados['frequencia'] == 'semestral': delta = relativedelta(months=i*6)
-                elif dados['frequencia'] == 'anual': delta = relativedelta(years=i)
-                data_recorrencia = dados['data_inicio'] + delta
+                data_recorrencia = dados['data_inicio'] + calcular_delta_recorrencia(dados['frequencia'], i)
                 Despesa.objects.create(
                     user=user, descricao=dados['descricao'], valor=dados['valor'], data=data_recorrencia,
                     categoria=dados['categoria'], conta=dados['conta'], cartao=dados['cartao'],
@@ -195,13 +209,7 @@ def adicionar_receita_recorrente(request):
             dados = form.cleaned_data
             id_rec = uuid.uuid4()
             for i in range(dados['repeticoes']):
-                if dados['frequencia'] == 'semanal': delta = relativedelta(weeks=i)
-                elif dados['frequencia'] == 'quinzenal': delta = relativedelta(weeks=i*2)
-                elif dados['frequencia'] == 'mensal': delta = relativedelta(months=i)
-                elif dados['frequencia'] == 'trimestral': delta = relativedelta(months=i*3)
-                elif dados['frequencia'] == 'semestral': delta = relativedelta(months=i*6)
-                elif dados['frequencia'] == 'anual': delta = relativedelta(years=i)
-                data_recorrencia = dados['data_inicio'] + delta
+                data_recorrencia = dados['data_inicio'] + calcular_delta_recorrencia(dados['frequencia'], i)
                 Receita.objects.create(
                     user=user, descricao=dados['descricao'], valor=dados['valor'], data=data_recorrencia,
                     categoria=dados['categoria'], conta=dados['conta'],

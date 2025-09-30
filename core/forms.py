@@ -89,23 +89,6 @@ class RecorrenteReceitaForm(forms.ModelForm):
         model = Receita
         fields = ['descricao', 'valor', 'categoria', 'conta']
 
-class CategoriaForm(forms.ModelForm):
-    class Meta:
-        model = Categoria
-        fields = ['nome', 'orcamento_mensal', 'categoria_mae']
-
-    def __init__(self, *args, **kwargs):
-        # Pega a família que a view vai passar
-        familia = kwargs.pop('familia', None)
-        super().__init__(*args, **kwargs)
-
-        if familia:
-            # Mostra apenas as categorias principais da família como opções para "categoria_mae"
-            self.fields['categoria_mae'].queryset = Categoria.objects.filter(
-                familia=familia, 
-                categoria_mae__isnull=True
-            )
-
 class CategoriaReceitaForm(forms.ModelForm):
     class Meta:
         model = CategoriaReceita
@@ -149,7 +132,11 @@ class AporteInvestimentoForm(forms.ModelForm):
         widgets = {'data': forms.DateInput(attrs={'type': 'date'})}
 
 class PagamentoFaturaForm(forms.Form):
-    conta_pagamento = forms.ModelChoiceField(queryset=Conta.objects.all(), label="Pagar com a conta", widget=forms.Select(attrs={'class': 'form-select'}))
+    conta_pagamento = forms.ModelChoiceField(
+        queryset=Conta.objects.none(),
+        label="Pagar com a conta",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     data_pagamento = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), initial=date.today, label="Data do Pagamento")
     def __init__(self, *args, **kwargs):
         familia = kwargs.pop('familia', None)
@@ -161,7 +148,7 @@ class PagamentoFaturaForm(forms.Form):
 # --- APORTEFORM ATUALIZADO ---
 class AporteForm(forms.Form):
     valor = forms.DecimalField(max_digits=15, decimal_places=2, label="Valor do Aporte")
-    conta_origem = forms.ModelChoiceField(queryset=Conta.objects.all(), label="Conta de Origem")
+    conta_origem = forms.ModelChoiceField(queryset=Conta.objects.none(), label="Conta de Origem")
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -170,7 +157,7 @@ class AporteForm(forms.Form):
             self.fields['conta_origem'].queryset = Conta.objects.filter(familia=user.perfil.familia)
         else:
             self.fields['conta_origem'].queryset = Conta.objects.none()
-            
+
 class CategoriaForm(forms.ModelForm):
     class Meta:
         model = Categoria
@@ -182,6 +169,6 @@ class CategoriaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if familia:
             self.fields['categoria_mae'].queryset = Categoria.objects.filter(
-                familia=familia, 
+                familia=familia,
                 categoria_mae__isnull=True
             )
