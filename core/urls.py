@@ -1,9 +1,13 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from core.views.planos import debug_checkout_context
 from . import views
+from .views.assinaturas import planos as planos_view
+from .views.auth import pagina_planos
 
 urlpatterns = [
     # --- URLs de Autenticação, Onboarding e Landing Page ---
+    path("debug-checkout/", debug_checkout_context),
     path('login/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register, name='register'),
@@ -52,14 +56,24 @@ urlpatterns = [
     path('investimentos/<int:id>/', views.detalhe_investimento, name='detalhe_investimento'),
     path('investimentos/aporte/<int:investimento_id>/', views.adicionar_aporte_investimento, name='adicionar_aporte_investimento'),
 
-    # --- URLs de Configuração, Família e Pagamentos ---
+# --- URLs de Configuração, Família e Pagamentos ---
     path('configuracoes/', views.configuracoes, name='configuracoes'),
     path('familia/', views.gerenciar_familia, name='gerenciar_familia'),
     path('configuracoes/categoria/excluir/<int:id>/', views.excluir_categoria, name='excluir_categoria'),
     path('configuracoes/categoria_receita/excluir/<int:id>/', views.excluir_categoria_receita, name='excluir_categoria_receita'),
     path('configuracoes/conta/excluir/<int:id>/', views.excluir_conta, name='excluir_conta'),
     path('configuracoes/cartao/excluir/<int:id>/', views.excluir_cartao, name='excluir_cartao'),
-    path('planos/', views.pagina_planos, name='pagina_planos'),
+
+    # ---- PLANOS (use apenas UMA view) ------------------------------------------
+    # use a view que popula o contexto (seed dos planos + assinatura gratuita)
+    
+
+    path('planos/', planos_view, name='planos'),
+    path("planos/", pagina_planos, name="planos"),
+    path("planos/", pagina_planos, name="pagina_planos"),
+
+    # checkout / stripe
     path('planos/criar-checkout-session/<int:plano_id>/', views.criar_checkout_session, name='criar_checkout_session'),
     path('stripe/webhook/', views.stripe_webhook, name='stripe_webhook'),
+
 ]

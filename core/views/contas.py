@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.db.models import Sum
 from datetime import date
 from django.contrib import messages
-
+from dateutil.relativedelta import relativedelta
 from core.models import Conta, Receita, Despesa
 from core.forms import ContaForm # <<< IMPORTAÇÃO ADICIONADA
 
